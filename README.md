@@ -36,6 +36,21 @@ pnpm preview
 
 ### 棋譜の追加方法
 
+#### 方法1: .kif ファイルから変換（推奨）
+
+1. **kifus-source ディレクトリに .kif ファイルを配置**
+   - ファイル名は `{ID}_{YYYY-MM-DD}.kif` の形式にする
+   - 例: `003_2025-12-04.kif`
+
+2. **変換スクリプトを実行**
+   ```bash
+   pnpm convert
+   ```
+   - 自動的に JKF 形式に変換され、`public/kifus/` に配置されます
+   - `public/kifus/index.json` も自動更新されます
+
+#### 方法2: JKF ファイルを直接作成
+
 1. **棋譜データの作成**
    - `public/kifus/{ID}_{YYYY-MM-DD}.json` の形式でファイルを作成
    - JSON Kifu Format (JKF) 形式で記述

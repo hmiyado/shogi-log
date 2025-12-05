@@ -178,7 +178,8 @@
     /* 狭い画面では持ち駒を横並びに */
     .captured-pieces {
         width: min(400px, 90vw);
-        min-height: auto;
+        height: auto;
+        /* モバイルでは高さを自動調整 */
     }
 
     .captured-list {

@@ -1,11 +1,13 @@
 /// <reference types="preact" />
 import { useState, useEffect } from 'preact/hooks';
+import { useLocation } from 'preact-iso';
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
 
 export function KifuList() {
     const [kifus, setKifus] = useState<KifuMetadata[]>([]);
     const [loading, setLoading] = useState(true);
+    const { route } = useLocation();
 
     useEffect(() => {
         loadKifuIndex().then((data) => {
@@ -15,7 +17,7 @@ export function KifuList() {
     }, []);
 
     const handleKifuClick = (kifu: KifuMetadata) => {
-        window.location.hash = `#/kifu/${kifu.id}/${kifu.date}`;
+        route(`/kifu/${kifu.id}/${kifu.date}`);
     };
 
     if (loading) {

@@ -11,7 +11,18 @@ interface ShogiBoardProps {
 export function ShogiBoard({ kifuData }: ShogiBoardProps) {
     const [shogi, setShogi] = useState<Shogi>(new Shogi());
     const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const moves = kifuData.moves;
+
+    // ウィンドウリサイズ時に画面幅を監視
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // URLクエリパラメータから初期手数を取得
     useEffect(() => {
@@ -168,8 +179,9 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
 
         // 駒の並び順を定義（歩、香、桂、銀、金、角、飛）
         const pieceOrder = ['FU', 'KY', 'KE', 'GI', 'KI', 'KA', 'HI'];
-        // 後手は逆順（飛、角、金、銀、桂、香、歩）
-        const displayOrder = color === 1 ? [...pieceOrder].reverse() : pieceOrder;
+
+        // モバイル（768px以下）では両方同じ順序、デスクトップでは後手は逆順
+        const displayOrder = (color === 1 && !isMobile) ? [...pieceOrder].reverse() : pieceOrder;
 
         // handsは配列形式: [{kind: 'FU', color: 0}, ...]
         if (Array.isArray(hands)) {

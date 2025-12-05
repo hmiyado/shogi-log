@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import { Shogi } from 'shogi.js';
 import type { JKFData, JKFMoveData } from '../types/kifu';
 import { getPieceName } from '../utils/gameLogic';
@@ -12,6 +12,53 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
     const [shogi, setShogi] = useState<Shogi>(new Shogi());
     const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
     const moves = kifuData.moves;
+
+    // URLクエリパラメータから初期手数を取得
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const moveParam = params.get('move');
+        if (moveParam) {
+            const moveIndex = parseInt(moveParam, 10);
+            if (!isNaN(moveIndex) && moveIndex >= 0 && moveIndex < moves.length) {
+                setCurrentMoveIndex(moveIndex);
+            }
+        }
+    }, []);
+
+    // 手数が変わったらURLを更新
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (currentMoveIndex > 0) {
+            params.set('move', currentMoveIndex.toString());
+        } else {
+            params.delete('move');
+        }
+        const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+        window.history.replaceState({}, '', newUrl);
+
+        // 手数が変わったら盤面を更新
+        resetToMove(currentMoveIndex);
+    }, [currentMoveIndex]);
+
+    // キーボード操作
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentMoveIndex > 0) {
+                    setCurrentMoveIndex(currentMoveIndex - 1);
+                }
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (currentMoveIndex < moves.length - 1) {
+                    setCurrentMoveIndex(currentMoveIndex + 1);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [currentMoveIndex, moves.length]);
 
     // 局面をリセット
     const resetToMove = (moveIndex: number) => {

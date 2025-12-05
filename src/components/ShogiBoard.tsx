@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
 import { Shogi } from 'shogi.js';
 import type { JKFData, JKFMoveData } from '../types/kifu';
-import { getPieceName, isPromoted } from '../utils/gameLogic';
+import { getPieceName } from '../utils/gameLogic';
 import '../styles/board.css';
 
 interface ShogiBoardProps {
@@ -60,6 +60,34 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
         }
     };
 
+    // 駒の画像URLを取得
+    const getPieceImageUrl = (pieceKind: string, color: number) => {
+        const colorPrefix = color === 0 ? 'black' : 'white';
+        const baseUrl = 'https://sunfish-shogi.github.io/shogi-images/hitomoji_wood';
+
+        const pieceMap: { [key: string]: string } = {
+            'FU': 'pawn',
+            'KY': 'lance',
+            'KE': 'knight',
+            'GI': 'silver',
+            'KI': 'gold',
+            'KA': 'bishop',
+            'HI': 'rook',
+            'OU': 'king',
+            'TO': 'prom_pawn',
+            'NY': 'prom_lance',
+            'NK': 'prom_knight',
+            'NG': 'prom_silver',
+            'UM': 'horse',
+            'RY': 'dragon',
+        };
+
+        const pieceName = pieceMap[pieceKind];
+        if (!pieceName) return '';
+
+        return `${baseUrl}/${colorPrefix}_${pieceName}.png`;
+    };
+
     // 盤面の駒を描画
     const renderBoard = () => {
         const cells = [];
@@ -71,12 +99,11 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
                 cells.push(
                     <div key={`${x}-${y}`} class="board-cell" data-x={x} data-y={y}>
                         {piece && (
-                            <div
-                                class={`piece ${piece.color === 1 ? 'gote' : 'sente'} ${isPromoted(piece.kind) ? 'promoted' : ''
-                                    }`}
-                            >
-                                {getPieceName(piece.kind)}
-                            </div>
+                            <img
+                                src={getPieceImageUrl(piece.kind, piece.color)}
+                                alt={getPieceName(piece.kind)}
+                                class={`piece-image ${piece.color === 1 ? 'gote' : 'sente'}`}
+                            />
                         )}
                     </div>
                 );

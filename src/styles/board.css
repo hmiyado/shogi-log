@@ -41,15 +41,22 @@
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     grid-template-rows: repeat(9, 1fr);
-    background-color: var(--color-board);
-    border: 3px solid var(--color-board-dark);
+    background-image: url('https://sunfish-shogi.github.io/shogi-images/board/light_458x500.png');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 3px solid #8b6914;
     box-shadow: var(--shadow-lg);
-    aspect-ratio: 1;
-    width: min(500px, 90vw);
+    /* 458x500の比率 */
+    aspect-ratio: 458 / 500;
+    width: min(458px, 80vw);
+    height: auto;
+    /* 盤の画像の余白を考慮したパディング */
+    padding: 5px;
+    box-sizing: border-box;
 }
 
 .board-cell {
-    border: 1px solid var(--color-board-line);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -66,14 +73,24 @@
     background-color: rgba(201, 169, 97, 0.4);
 }
 
-/* 駒 */
-.piece {
-    width: 85%;
-    height: 85%;
-    display: flex;
+/* 駒画像 */
+.piece-image {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+    user-select: none;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* 持ち駒の駒（テキスト表示） */
+.captured-list .piece {
+    width: auto;
+    height: auto;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
     font-weight: 700;
     color: var(--color-text);
     background-color: var(--color-bg-secondary);
@@ -81,14 +98,6 @@
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-sm);
     user-select: none;
-}
-
-.piece.gote {
-    transform: rotate(180deg);
-}
-
-.piece.promoted {
-    color: var(--color-accent);
 }
 
 /* コントロール */

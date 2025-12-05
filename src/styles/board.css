@@ -100,6 +100,39 @@
     user-select: none;
 }
 
+/* 持ち駒アイテム */
+.captured-piece-item {
+    position: relative;
+    display: inline-block;
+    margin: var(--spacing-xs);
+}
+
+.captured-piece-image {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.piece-count {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.no-pieces {
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+}
+
 /* コントロール */
 .board-controls {
     display: flex;

@@ -117,14 +117,28 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
         const hands = shogi.hands[color];
         const pieces = [];
 
-        for (const [pieceKind, count] of Object.entries(hands)) {
-            const countNum = typeof count === 'number' ? count : 0;
-            if (countNum > 0) {
+        console.log(`持ち駒 (color ${color}):`, hands);
+
+        // handsは配列形式: [{kind: 'FU', color: 0}, ...]
+        if (Array.isArray(hands)) {
+            // 駒の種類ごとにカウント
+            const pieceCounts: { [key: string]: number } = {};
+            hands.forEach((piece: any) => {
+                const kind = piece.kind;
+                pieceCounts[kind] = (pieceCounts[kind] || 0) + 1;
+            });
+
+            // 駒を表示
+            for (const [pieceKind, count] of Object.entries(pieceCounts)) {
                 pieces.push(
-                    <span key={pieceKind} class="piece">
-                        {getPieceName(pieceKind)}
-                        {countNum > 1 ? countNum : ''}
-                    </span>
+                    <div key={pieceKind} class="captured-piece-item">
+                        <img
+                            src={getPieceImageUrl(pieceKind, color)}
+                            alt={getPieceName(pieceKind)}
+                            class="captured-piece-image"
+                        />
+                        {count > 1 && <span class="piece-count">{count}</span>}
+                    </div>
                 );
             }
         }
@@ -132,7 +146,7 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
         return (
             <div class="captured-pieces">
                 <h3>{color === 0 ? '先手の持ち駒' : '後手の持ち駒'}</h3>
-                <div class="captured-list">{pieces}</div>
+                <div class="captured-list">{pieces.length > 0 ? pieces : <span class="no-pieces">なし</span>}</div>
             </div>
         );
     };

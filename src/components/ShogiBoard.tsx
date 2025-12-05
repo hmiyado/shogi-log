@@ -166,6 +166,11 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
 
         console.log(`持ち駒 (color ${color}):`, hands);
 
+        // 駒の並び順を定義（歩、香、桂、銀、金、角、飛）
+        const pieceOrder = ['FU', 'KY', 'KE', 'GI', 'KI', 'KA', 'HI'];
+        // 後手は逆順（飛、角、金、銀、桂、香、歩）
+        const displayOrder = color === 1 ? [...pieceOrder].reverse() : pieceOrder;
+
         // handsは配列形式: [{kind: 'FU', color: 0}, ...]
         if (Array.isArray(hands)) {
             // 駒の種類ごとにカウント
@@ -175,18 +180,21 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
                 pieceCounts[kind] = (pieceCounts[kind] || 0) + 1;
             });
 
-            // 駒を表示
-            for (const [pieceKind, count] of Object.entries(pieceCounts)) {
-                pieces.push(
-                    <div key={pieceKind} class="captured-piece-item">
-                        <img
-                            src={getPieceImageUrl(pieceKind, color)}
-                            alt={getPieceName(pieceKind)}
-                            class="captured-piece-image"
-                        />
-                        {count > 1 && <span class="piece-count">{count}</span>}
-                    </div>
-                );
+            // 定義された順序で駒を表示
+            for (const pieceKind of displayOrder) {
+                const count = pieceCounts[pieceKind];
+                if (count && count > 0) {
+                    pieces.push(
+                        <div key={pieceKind} class="captured-piece-item">
+                            <img
+                                src={getPieceImageUrl(pieceKind, color)}
+                                alt={getPieceName(pieceKind)}
+                                class="captured-piece-image"
+                            />
+                            {count > 1 && <span class="piece-count">{count}</span>}
+                        </div>
+                    );
+                }
             }
         }
 

@@ -77,16 +77,16 @@ export function KifuList() {
                 </p>
             ) : (
                 <>
-                    <div class="kifu-list-container" style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                    <div class="card table-container">
+                        <table class="data-table">
                             <thead>
-                                <tr style={{ borderBottom: '2px solid var(--color-border)' }}>
-                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'left' }}>日付</th>
-                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'left' }}>先手</th>
-                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'center' }}>vs</th>
-                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'left' }}>後手</th>
-                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'left' }}>結果</th>
-                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'right' }}>手数</th>
+                                <tr>
+                                    <th>日付</th>
+                                    <th>先手</th>
+                                    <th class="text-center">vs</th>
+                                    <th>後手</th>
+                                    <th>結果</th>
+                                    <th class="text-right">手数</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -94,20 +94,14 @@ export function KifuList() {
                                     <tr
                                         key={`${kifu.id}-${kifu.date}`}
                                         onClick={() => handleKifuClick(kifu)}
-                                        style={{
-                                            borderBottom: '1px solid var(--color-border)',
-                                            cursor: 'pointer',
-                                            transition: 'background-color 0.2s',
-                                        }}
-                                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)')}
-                                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                        class="clickable"
                                     >
-                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)' }}>{kifu.date}</td>
-                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', fontWeight: 'bold' }}>{kifu.sente}</td>
-                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', textAlign: 'center', color: 'var(--color-text-muted)' }}>vs</td>
-                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', fontWeight: 'bold' }}>{kifu.gote}</td>
-                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', color: 'var(--color-primary)' }}>{kifu.result}</td>
-                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', textAlign: 'right' }}>{kifu.moves}手</td>
+                                        <td>{kifu.date}</td>
+                                        <td class="font-bold">{kifu.sente}</td>
+                                        <td class="text-center text-muted">vs</td>
+                                        <td class="font-bold">{kifu.gote}</td>
+                                        <td class="text-primary">{kifu.result}</td>
+                                        <td class="text-right">{kifu.moves}手</td>
                                     </tr>
                                 ))}
                             </tbody>

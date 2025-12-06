@@ -162,45 +162,31 @@ export function PlayerStatsPage({ name }: { name: string }) {
 
             {/* 対戦相手別成績 */}
             <h3 class="mb-md">対戦相手別成績</h3>
-            <div class="card" style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
+            <div class="card table-container">
+                <table class="data-table">
                     <thead>
-                        <tr style={{ borderBottom: '2px solid var(--color-border)' }}>
-                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'left' }}>対戦相手</th>
-                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>対局数</th>
-                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>勝ち</th>
-                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>負け</th>
-                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>引き分け</th>
-                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>勝率</th>
+                        <tr>
+                            <th>対戦相手</th>
+                            <th class="text-center">対局数</th>
+                            <th class="text-center">勝ち</th>
+                            <th class="text-center">負け</th>
+                            <th class="text-center">引き分け</th>
+                            <th class="text-center">勝率</th>
                         </tr>
                     </thead>
                     <tbody>
                         {sortedOpponents.map(([opponent, record]) => (
                             <tr
                                 key={opponent}
-                                style={{
-                                    borderBottom: '1px solid var(--color-border-light)',
-                                    transition: 'background-color 0.2s',
-                                    cursor: 'pointer'
-                                }}
+                                class="clickable"
                                 onClick={() => route(`/player/${encodeURIComponent(opponent)}`)}
-                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)')}
-                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                             >
-                                <td style={{ padding: 'var(--spacing-md)', fontWeight: 'bold' }}>{opponent}</td>
-                                <td style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>{record.total}</td>
-                                <td style={{ padding: 'var(--spacing-md)', textAlign: 'center', color: '#4caf50', fontWeight: '600' }}>
-                                    {record.wins}
-                                </td>
-                                <td style={{ padding: 'var(--spacing-md)', textAlign: 'center', color: '#f44336', fontWeight: '600' }}>
-                                    {record.losses}
-                                </td>
-                                <td style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>
-                                    {record.draws}
-                                </td>
-                                <td style={{ padding: 'var(--spacing-md)', textAlign: 'center', fontWeight: '600' }}>
-                                    {record.winRate}%
-                                </td>
+                                <td class="font-bold">{opponent}</td>
+                                <td class="text-center">{record.total}</td>
+                                <td class="text-center text-success font-bold">{record.wins}</td>
+                                <td class="text-center text-danger font-bold">{record.losses}</td>
+                                <td class="text-center">{record.draws}</td>
+                                <td class="text-center font-bold">{record.winRate}%</td>
                             </tr>
                         ))}
                     </tbody>

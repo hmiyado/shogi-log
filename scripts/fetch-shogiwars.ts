@@ -7,6 +7,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { Window } from 'happy-dom';
+import { Shogi } from 'shogi.js';
 
 interface ShogiWarsMove {
     t: number;
@@ -114,15 +115,23 @@ export function convertToJKF(swData: ShogiWarsData): JKFData {
 
     // 初期局面を設定（SFEN形式がある場合）
     let initial: any = undefined;
+    const shogi = new Shogi();
+
     if (gameHash.init_sfen_position) {
         initial = {
             data: {
-                // SFEN形式をそのまま保存
-                // JKFではpresetとdataの両方をサポート
                 sfen: gameHash.init_sfen_position
             }
         };
-        header['手合割'] = '平手'; // または適切な手合割を設定
+        header['手合割'] = '平手';
+        try {
+            shogi.initializeFromSFENString(gameHash.init_sfen_position);
+        } catch (e) {
+            console.error('SFEN parsing failed, falling back to HIRATE', e);
+            shogi.initialize();
+        }
+    } else {
+        shogi.initialize();
     }
 
     // 指し手を変換
@@ -131,10 +140,45 @@ export function convertToJKF(swData: ShogiWarsData): JKFData {
     if (gameHash.moves && Array.isArray(gameHash.moves)) {
         for (const swMove of gameHash.moves) {
             const jkfMove = parseMove(swMove.m);
-            if (swMove.t) {
-                jkfMove.time = { now: swMove.t };
+            const move = jkfMove.move;
+
+            if (move) {
+                if (move.from) {
+                    // 盤上の駒を取得
+                    const pieceOnBoard = shogi.get(move.from.x, move.from.y);
+
+                    if (pieceOnBoard) {
+                        // 盤上の駒と移動後の駒が異なる場合は「成り」と判定
+                        if (pieceOnBoard.kind !== move.piece) {
+                            // JKF形式では「移動する前の駒種」と「promote: true」を記録する
+                            move.piece = pieceOnBoard.kind;
+                            (move as any).promote = true;
+                        } else {
+                            // 成らない場合でも、元の駒種を使う（念のため）
+                            move.piece = pieceOnBoard.kind;
+                        }
+                    }
+
+                    // 内部状態を更新
+                    try {
+                        shogi.move(move.from.x, move.from.y, move.to.x, move.to.y, (move as any).promote || false);
+                    } catch (e) {
+                        console.error('Move error:', e);
+                    }
+                } else {
+                    // 駒打ち
+                    try {
+                        shogi.drop(move.to.x, move.to.y, move.piece as any);
+                    } catch (e) {
+                        console.error('Drop error:', e);
+                    }
+                }
+
+                if (swMove.t) {
+                    jkfMove.time = { now: swMove.t };
+                }
+                moves.push(jkfMove);
             }
-            moves.push(jkfMove);
         }
     }
 

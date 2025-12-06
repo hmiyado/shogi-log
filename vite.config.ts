@@ -7,5 +7,13 @@ export default defineConfig(({ command }) => ({
     base: command === 'build' ? '/shogi-log/' : '/',
     build: {
         outDir: 'dist',
+        rollupOptions: {
+            input: {
+                main: 'index.html',
+                statistics: 'statistics.html',
+                player: 'player.html',
+                viewer: 'viewer.html',
+            },
+        },
     },
 }))

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'preact/hooks';
-import { useLocation } from 'preact-iso';
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
 
@@ -14,7 +13,7 @@ interface OpponentStats {
 export function StatisticsView() {
     const [opponentStats, setOpponentStats] = useState<[string, OpponentStats][]>([]);
     const [loading, setLoading] = useState(true);
-    const { route } = useLocation();
+
 
     useEffect(() => {
         loadKifuIndex().then((kifus) => {
@@ -106,7 +105,7 @@ export function StatisticsView() {
                                         <tr
                                             key={opponent}
                                             class="clickable"
-                                            onClick={() => route(`/player/${encodeURIComponent(opponent)}`)}
+                                            onClick={() => window.location.href = `/player.html?name=${encodeURIComponent(opponent)}`}
                                         >
                                             <td class="font-bold">{opponent}</td>
                                             <td class="text-center">{record.total}</td>

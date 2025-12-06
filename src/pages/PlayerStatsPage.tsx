@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'preact/hooks';
-import { useLocation } from 'preact-iso';
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
 
@@ -24,7 +23,6 @@ export function PlayerStatsPage({ name }: { name: string }) {
     const decodedName = decodeURIComponent(name);
     const [stats, setStats] = useState<PlayerStats | null>(null);
     const [loading, setLoading] = useState(true);
-    const { route } = useLocation();
 
     useEffect(() => {
         loadKifuIndex().then((kifus) => {
@@ -108,7 +106,7 @@ export function PlayerStatsPage({ name }: { name: string }) {
         <div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--spacing-lg)' }}>
                 <button
-                    onClick={() => route('/statistics')}
+                    onClick={() => window.location.href = '/statistics.html'}
                     class="btn"
                     style={{ marginRight: 'var(--spacing-md)' }}
                 >
@@ -179,7 +177,7 @@ export function PlayerStatsPage({ name }: { name: string }) {
                             <tr
                                 key={opponent}
                                 class="clickable"
-                                onClick={() => route(`/player/${encodeURIComponent(opponent)}`)}
+                                onClick={() => window.location.href = `/player.html?name=${encodeURIComponent(opponent)}`}
                             >
                                 <td class="font-bold">{opponent}</td>
                                 <td class="text-center">{record.total}</td>

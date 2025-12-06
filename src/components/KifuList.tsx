@@ -1,6 +1,6 @@
 /// <reference types="preact" />
 import { useState, useEffect } from 'preact/hooks';
-import { useLocation } from 'preact-iso';
+
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
 
@@ -9,7 +9,6 @@ export function KifuList() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const { route } = useLocation();
     const itemsPerPage = 10;
 
     useEffect(() => {
@@ -20,7 +19,7 @@ export function KifuList() {
     }, []);
 
     const handleKifuClick = (kifu: KifuMetadata) => {
-        route(`/kifu/${kifu.id}/${kifu.date}`);
+        window.location.href = `/viewer.html?id=${kifu.id}&date=${kifu.date}`;
     };
 
     // 検索フィルター

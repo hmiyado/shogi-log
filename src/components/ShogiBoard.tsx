@@ -221,7 +221,7 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
     };
 
     // 持ち駒を描画
-    const renderCapturedPieces = (color: number) => {
+    const renderCapturedPieces = (color: number, playerName: string) => {
         const hands = shogi.hands[color];
         const pieces = [];
 
@@ -260,9 +260,18 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
             }
         }
 
+        const mark = color === 0 ? '☗' : '☖';
+
         return (
             <div class="captured-pieces">
-                <h3>{color === 0 ? '先手の持ち駒' : '後手の持ち駒'}</h3>
+                <h3 title={playerName} style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                }}>
+                    <span style={{ fontSize: '120%', marginRight: '4px' }}>{mark}</span>
+                    {playerName}
+                </h3>
                 <div class="captured-list">{pieces.length > 0 ? pieces : <span class="no-pieces">なし</span>}</div>
             </div>
         );
@@ -270,25 +279,16 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
 
     return (
         <div class="board-container">
-            {/* ヘッダー情報 */}
-            <div class="card mb-lg">
-                <h2>{kifuData.header['棋戦'] || '対局'}</h2>
-                <p>
-                    <strong>先手:</strong> {kifuData.header['先手'] || '不明'}
-                </p>
-                <p>
-                    <strong>後手:</strong> {kifuData.header['後手'] || '不明'}
-                </p>
-                <p>
-                    <strong>日時:</strong> {kifuData.header['開始日時'] || '不明'}
-                </p>
+            {/* ヘッダー情報 (コンパクト化) */}
+            <div class="text-center mb-md text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+                {kifuData.header['棋戦'] || '対局'} | {kifuData.header['開始日時'] || '不明'}
             </div>
 
             {/* 盤面エリア */}
             <div class="board-wrapper">
-                {renderCapturedPieces(1)}
+                {renderCapturedPieces(1, kifuData.header['後手'] || '後手')}
                 <div class="shogi-board">{renderBoard()}</div>
-                {renderCapturedPieces(0)}
+                {renderCapturedPieces(0, kifuData.header['先手'] || '先手')}
             </div>
 
             {/* コントロール */}

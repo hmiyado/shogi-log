@@ -9,7 +9,20 @@ interface ShogiBoardProps {
 }
 
 export function ShogiBoard({ kifuData }: ShogiBoardProps) {
-    const [shogi, setShogi] = useState<Shogi>(new Shogi());
+    const [shogi, setShogi] = useState<Shogi>(() => {
+        // 初期局面がある場合はSFENから初期化
+        const initial = (kifuData as any).initial;
+        const shogi = new Shogi();
+        if (initial?.data?.sfen) {
+            try {
+                shogi.initializeFromSFENString(initial.data.sfen);
+            } catch (error) {
+                console.error('Failed to initialize from SFEN:', error);
+                shogi.initialize();
+            }
+        }
+        return shogi;
+    });
     const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const moves = kifuData.moves;
@@ -73,7 +86,20 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
 
     // 局面をリセット
     const resetToMove = (moveIndex: number) => {
+        // 初期局面から開始
+        const initial = (kifuData as any).initial;
         const newShogi = new Shogi();
+
+        if (initial?.data?.sfen) {
+            try {
+                newShogi.initializeFromSFENString(initial.data.sfen);
+            } catch (error) {
+                console.error('Failed to initialize from SFEN:', error);
+                newShogi.initialize();
+            }
+        }
+
+        // 指定された手数まで進める
         for (let i = 1; i <= moveIndex; i++) {
             const move = moves[i];
             if (move.move) {

@@ -299,14 +299,16 @@ export async function fetchAndConvert(url: string): Promise<{
     // 生データを保存
     const sourceDir = join(process.cwd(), 'kifus-source');
     if (!existsSync(sourceDir)) {
+        mkdirSync(sourceDir);
     }
 
-    // mkdirSyncをimportに追加するのが面倒なので、既存のimported functionを確認
-    // import { readFileSync, writeFileSync, existsSync } from 'fs';
-    // mkdirSyncがない。
+    const rawFilename = `${id}_${date}_raw.json`;
+    const rawFilepath = join(sourceDir, rawFilename);
+    writeFileSync(rawFilepath, JSON.stringify(swData, null, 2));
+    console.log(`✓ Saved raw data: ${rawFilename}`);
 
-    // 別の方法: mkdirSyncを追加してから実装する。
-    // まずはこのブロックではなく、import文を修正する。
+    // index.jsonを更新
+    updateIndex(id, date, jkfData);
 
 
     console.log('\n=== Conversion Complete ===');

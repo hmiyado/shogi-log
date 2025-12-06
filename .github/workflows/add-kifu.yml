@@ -1,0 +1,47 @@
+name: Add Kifu from Shogi Wars
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: '将棋ウォーズのURL (例: https://shogiwars.heroz.jp/games/...)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  add-kifu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        with:
+          version: 10
+      
+      - name: Setup Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Fetch and convert kifu
+        run: |
+          pnpm tsx scripts/fetch-shogiwars.ts "${{ inputs.url }}"
+        env:
+          SHOGIWARS_URL: ${{ inputs.url }}
+      
+      - name: Commit and push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add public/kifus/
+          git diff --staged --quiet || git commit -m "Add kifu from Shogi Wars"
+          git push

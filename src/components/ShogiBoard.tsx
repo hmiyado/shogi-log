@@ -120,7 +120,31 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
         if (!move) return;
 
         if (move.from) {
-            shogiInstance.move(move.from.x, move.from.y, move.to.x, move.to.y, move.promote || false);
+            const pieceAtSource = shogiInstance.get(move.from.x, move.from.y);
+            let shouldPromote = move.promote;
+
+            // プロモーションフラグがない場合、駒の種類が変わっているかチェックして自動判定
+            if (!shouldPromote && pieceAtSource) {
+                const boardPieceKind = pieceAtSource.kind;
+                const movePieceKind = move.piece;
+
+                // 成り駒への変化マッピング
+                const promotionMap: { [key: string]: string } = {
+                    'FU': 'TO',
+                    'KY': 'NY',
+                    'KE': 'NK',
+                    'GI': 'NG',
+                    'KA': 'UM',
+                    'HI': 'RY',
+                };
+
+                // 盤上の駒が成れる種類で、かつ移動後の駒種が成った後のものである場合
+                if (promotionMap[boardPieceKind] === movePieceKind) {
+                    shouldPromote = true;
+                }
+            }
+
+            shogiInstance.move(move.from.x, move.from.y, move.to.x, move.to.y, shouldPromote || false);
         } else {
             shogiInstance.drop(move.to.x, move.to.y, move.piece as any);
         }

@@ -2,6 +2,7 @@ import { Router, Route } from 'preact-iso';
 import { Home } from '../pages/Home';
 import { KifuViewer } from '../pages/KifuViewer';
 import { StatisticsPage } from '../pages/StatisticsPage';
+import { PlayerStatsPage } from '../pages/PlayerStatsPage';
 
 export function App() {
     return (
@@ -21,6 +22,12 @@ export function App() {
                 <Router>
                     <Route path="/" component={Home} />
                     <Route path="/statistics" component={StatisticsPage} />
+                    <Route
+                        path="/player/:name"
+                        component={({ params }: any) => (
+                            <PlayerStatsPage name={params.name} />
+                        )}
+                    />
                     <Route
                         path="/kifu/:id/:date"
                         component={({ params }: any) => (

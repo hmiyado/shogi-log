@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
+import { useLocation } from 'preact-iso';
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
 
@@ -13,6 +14,7 @@ interface OpponentStats {
 export function StatisticsView() {
     const [opponentStats, setOpponentStats] = useState<[string, OpponentStats][]>([]);
     const [loading, setLoading] = useState(true);
+    const { route } = useLocation();
 
     useEffect(() => {
         loadKifuIndex().then((kifus) => {
@@ -102,7 +104,9 @@ export function StatisticsView() {
                                 style={{
                                     borderBottom: '1px solid var(--color-border)',
                                     transition: 'background-color 0.2s',
+                                    cursor: 'pointer'
                                 }}
+                                onClick={() => route(`/player/${encodeURIComponent(name)}`)}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)')}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                             >

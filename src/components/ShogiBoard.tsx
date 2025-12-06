@@ -287,7 +287,21 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
             {/* 盤面エリア */}
             <div class="board-wrapper">
                 {renderCapturedPieces(1, kifuData.header['後手'] || '後手')}
-                <div class="shogi-board">{renderBoard()}</div>
+                <div
+                    class="shogi-board"
+                    onClick={(e) => {
+                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const width = rect.width;
+                        if (x > width / 2) {
+                            nextMove();
+                        } else {
+                            previousMove();
+                        }
+                    }}
+                >
+                    {renderBoard()}
+                </div>
                 {renderCapturedPieces(0, kifuData.header['先手'] || '先手')}
             </div>
 

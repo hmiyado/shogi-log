@@ -2,214 +2,149 @@ import { useState, useEffect } from 'preact/hooks';
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
 
-interface Statistics {
-    totalGames: number;
+interface OpponentStats {
     wins: number;
     losses: number;
     draws: number;
+    total: number;
     winRate: number;
-    byOpponent: Map<string, { wins: number; losses: number; draws: number }>;
 }
 
 export function StatisticsView() {
-    const [stats, setStats] = useState<Statistics | null>(null);
+    const [opponentStats, setOpponentStats] = useState<[string, OpponentStats][]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadKifuIndex().then((kifus) => {
-            const calculated = calculateStatistics(kifus);
-            setStats(calculated);
+            const stats = calculateStatistics(kifus);
+            // 勝率順、同率なら対局数順にソート
+            const sortedStats = Array.from(stats.entries()).sort(([, a], [, b]) => {
+                if (b.winRate !== a.winRate) {
+                    return b.winRate - a.winRate;
+                }
+                return b.total - a.total;
+            });
+            setOpponentStats(sortedStats);
+            setLoading(false);
         });
     }, []);
 
-    const calculateStatistics = (kifus: KifuMetadata[]): Statistics => {
-        const stats: Statistics = {
-            totalGames: kifus.length,
-            wins: 0,
-            losses: 0,
-            draws: 0,
-            winRate: 0,
-            byOpponent: new Map(),
-        };
+    const calculateStatistics = (kifus: KifuMetadata[]): Map<string, OpponentStats> => {
+        const stats = new Map<string, OpponentStats>();
 
         kifus.forEach((kifu) => {
-            if (kifu.result.includes('先手勝ち')) {
-                stats.wins++;
-            } else if (kifu.result.includes('後手勝ち')) {
-                stats.losses++;
-            } else {
-                stats.draws++;
-            }
+            // 自分の名前（先手または後手）を除外して対戦相手を特定するロジックが必要だが、
+            // 現状は簡易的に「自分以外」を判定するのが難しいので、
+            // 暫定的に「gote」を対戦相手として扱う（将棋ウォーズのデータ構造に依存）
+            // ※本来はユーザー設定などで「自分の名前」を持つべき
 
-            const opponent = kifu.gote;
-            if (!stats.byOpponent.has(opponent)) {
-                stats.byOpponent.set(opponent, { wins: 0, losses: 0, draws: 0 });
-            }
-            const opponentStats = stats.byOpponent.get(opponent)!;
+            // 将棋ウォーズのデータでは、自分がsenteかgoteかはURLやデータからは一意に決まらない場合があるが、
+            // ここでは簡易的に「対戦相手」を集計する。
+            // ただし、現状のデータ構造では「誰が自分か」の情報がないため、
+            // 単純に「先手 vs 後手」の勝敗を集計するのではなく、
+            // 「対戦相手ごとの成績」を出すには視点が必要。
 
-            if (kifu.result.includes('先手勝ち')) {
-                opponentStats.wins++;
-            } else if (kifu.result.includes('後手勝ち')) {
-                opponentStats.losses++;
-            } else {
-                opponentStats.draws++;
-            }
+            // ここでは、一旦「全ての対局者」をリストアップし、それぞれの勝敗を集計する形にする
+            // つまり、A vs B で A勝ちなら、Aは1勝、Bは1敗とする。
+
+            updateStats(stats, kifu.sente, kifu.result === '先手勝ち', kifu.result === '後手勝ち', kifu.result === '引き分け');
+            updateStats(stats, kifu.gote, kifu.result === '後手勝ち', kifu.result === '先手勝ち', kifu.result === '引き分け');
         });
 
-        stats.winRate =
-            stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
+        // 勝率を計算
+        stats.forEach((stat) => {
+            stat.winRate = stat.total > 0 ? Math.round((stat.wins / stat.total) * 100) : 0;
+        });
 
         return stats;
     };
 
-    if (!stats) {
+    const updateStats = (
+        stats: Map<string, OpponentStats>,
+        name: string,
+        isWin: boolean,
+        isLoss: boolean,
+        isDraw: boolean
+    ) => {
+        if (!stats.has(name)) {
+            stats.set(name, { wins: 0, losses: 0, draws: 0, total: 0, winRate: 0 });
+        }
+        const stat = stats.get(name)!;
+        if (isWin) stat.wins++;
+        if (isLoss) stat.losses++;
+        if (isDraw) stat.draws++;
+        stat.total++;
+    };
+
+    if (loading) {
         return <div class="text-center">読み込み中...</div>;
     }
 
     return (
         <div>
-            <h2 class="mb-lg">対戦成績</h2>
-
-            {/* 総合成績 */}
-            <div class="card mb-lg">
-                <h3 style={{ marginBottom: 'var(--spacing-md)' }}>総合成績</h3>
-                <div
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                        gap: 'var(--spacing-md)',
-                    }}
-                >
-                    <div>
-                        <div class="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
-                            対局数
-                        </div>
-                        <div
-                            style={{
-                                fontSize: 'var(--font-size-2xl)',
-                                fontWeight: '700',
-                                color: 'var(--color-primary)',
-                            }}
-                        >
-                            {stats.totalGames}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
-                            勝ち
-                        </div>
-                        <div
-                            style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: '#4caf50' }}
-                        >
-                            {stats.wins}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
-                            負け
-                        </div>
-                        <div
-                            style={{ fontSize: 'var(--font-size-2xl)', fontWeight: '700', color: '#f44336' }}
-                        >
-                            {stats.losses}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
-                            引き分け
-                        </div>
-                        <div
-                            style={{
-                                fontSize: 'var(--font-size-2xl)',
-                                fontWeight: '700',
-                                color: 'var(--color-secondary)',
-                            }}
-                        >
-                            {stats.draws}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
-                            勝率
-                        </div>
-                        <div
-                            style={{
-                                fontSize: 'var(--font-size-2xl)',
-                                fontWeight: '700',
-                                color: 'var(--color-accent)',
-                            }}
-                        >
-                            {stats.winRate}%
-                        </div>
-                    </div>
-                </div>
+            <h2 class="mb-lg">対局者別成績</h2>
+            <div class="card" style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
+                    <thead>
+                        <tr style={{ borderBottom: '2px solid var(--color-border)' }}>
+                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'left' }}>対局者</th>
+                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>対局数</th>
+                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>勝ち</th>
+                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>負け</th>
+                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>引き分け</th>
+                            <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>勝率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {opponentStats.map(([name, record]) => (
+                            <tr
+                                key={name}
+                                style={{
+                                    borderBottom: '1px solid var(--color-border)',
+                                    transition: 'background-color 0.2s',
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)')}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                            >
+                                <td style={{ padding: 'var(--spacing-md)', fontWeight: 'bold' }}>{name}</td>
+                                <td style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>{record.total}</td>
+                                <td
+                                    style={{
+                                        padding: 'var(--spacing-md)',
+                                        textAlign: 'center',
+                                        color: '#4caf50',
+                                        fontWeight: '600',
+                                    }}
+                                >
+                                    {record.wins}
+                                </td>
+                                <td
+                                    style={{
+                                        padding: 'var(--spacing-md)',
+                                        textAlign: 'center',
+                                        color: '#f44336',
+                                        fontWeight: '600',
+                                    }}
+                                >
+                                    {record.losses}
+                                </td>
+                                <td style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>
+                                    {record.draws}
+                                </td>
+                                <td
+                                    style={{
+                                        padding: 'var(--spacing-md)',
+                                        textAlign: 'center',
+                                        fontWeight: '600',
+                                    }}
+                                >
+                                    {record.winRate}%
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
-
-            {/* 対戦相手別成績 */}
-            {stats.byOpponent.size > 0 && (
-                <>
-                    <h3 class="mb-md">対戦相手別成績</h3>
-                    <div class="card" style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '2px solid var(--color-border)' }}>
-                                    <th style={{ padding: 'var(--spacing-md)', textAlign: 'left' }}>対戦相手</th>
-                                    <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>勝ち</th>
-                                    <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>負け</th>
-                                    <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>引き分け</th>
-                                    <th style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>勝率</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Array.from(stats.byOpponent.entries()).map(([opponent, record]) => {
-                                    const total = record.wins + record.losses + record.draws;
-                                    const winRate = total > 0 ? Math.round((record.wins / total) * 100) : 0;
-
-                                    return (
-                                        <tr
-                                            key={opponent}
-                                            style={{ borderBottom: '1px solid var(--color-border-light)' }}
-                                        >
-                                            <td style={{ padding: 'var(--spacing-md)' }}>{opponent}</td>
-                                            <td
-                                                style={{
-                                                    padding: 'var(--spacing-md)',
-                                                    textAlign: 'center',
-                                                    color: '#4caf50',
-                                                    fontWeight: '600',
-                                                }}
-                                            >
-                                                {record.wins}
-                                            </td>
-                                            <td
-                                                style={{
-                                                    padding: 'var(--spacing-md)',
-                                                    textAlign: 'center',
-                                                    color: '#f44336',
-                                                    fontWeight: '600',
-                                                }}
-                                            >
-                                                {record.losses}
-                                            </td>
-                                            <td style={{ padding: 'var(--spacing-md)', textAlign: 'center' }}>
-                                                {record.draws}
-                                            </td>
-                                            <td
-                                                style={{
-                                                    padding: 'var(--spacing-md)',
-                                                    textAlign: 'center',
-                                                    fontWeight: '600',
-                                                }}
-                                            >
-                                                {winRate}%
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
-            )}
         </div>
     );
 }

@@ -14,5 +14,13 @@
     "gote": "miyado",
     "result": "先手勝ち",
     "moves": 89
+  },
+  {
+    "id": "003",
+    "date": "2025-12-06",
+    "sente": "nasals",
+    "gote": "miyado",
+    "result": "不明",
+    "moves": 86
   }
 ]

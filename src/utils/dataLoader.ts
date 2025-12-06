@@ -1,6 +1,6 @@
 import type { KifuMetadata } from '../types/kifu';
 
-const KIFUS_BASE_URL = '/kifus';
+const KIFUS_BASE_URL = `${import.meta.env.BASE_URL}kifus`;
 
 // 棋譜インデックスを取得
 export async function loadKifuIndex(): Promise<KifuMetadata[]> {

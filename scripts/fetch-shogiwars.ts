@@ -4,7 +4,7 @@
  * 将棋ウォーズのURLから棋譜を取得してJKF形式に変換するスクリプト
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { Window } from 'happy-dom';
 import { Shogi } from 'shogi.js';
@@ -296,8 +296,18 @@ export async function fetchAndConvert(url: string): Promise<{
     writeFileSync(filepath, JSON.stringify(jkfData, null, 2));
     console.log(`\n✓ Created: ${filename}`);
 
-    // index.jsonを更新
-    updateIndex(id, date, jkfData);
+    // 生データを保存
+    const sourceDir = join(process.cwd(), 'kifus-source');
+    if (!existsSync(sourceDir)) {
+    }
+
+    // mkdirSyncをimportに追加するのが面倒なので、既存のimported functionを確認
+    // import { readFileSync, writeFileSync, existsSync } from 'fs';
+    // mkdirSyncがない。
+
+    // 別の方法: mkdirSyncを追加してから実装する。
+    // まずはこのブロックではなく、import文を修正する。
+
 
     console.log('\n=== Conversion Complete ===');
 

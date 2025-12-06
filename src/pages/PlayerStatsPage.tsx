@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
+import { resolvePath } from '../utils/pathHelper';
 
 interface OpponentStats {
     wins: number;
@@ -106,7 +107,7 @@ export function PlayerStatsPage({ name }: { name: string }) {
         <div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--spacing-lg)' }}>
                 <button
-                    onClick={() => window.location.href = '/statistics.html'}
+                    onClick={() => window.location.href = resolvePath('/statistics.html')}
                     class="btn"
                     style={{ marginRight: 'var(--spacing-md)' }}
                 >
@@ -177,7 +178,7 @@ export function PlayerStatsPage({ name }: { name: string }) {
                             <tr
                                 key={opponent}
                                 class="clickable"
-                                onClick={() => window.location.href = `/player.html?name=${encodeURIComponent(opponent)}`}
+                                onClick={() => window.location.href = resolvePath(`/player.html?name=${encodeURIComponent(opponent)}`)}
                             >
                                 <td class="font-bold">{opponent}</td>
                                 <td class="text-center">{record.total}</td>

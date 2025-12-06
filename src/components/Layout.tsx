@@ -1,3 +1,5 @@
+import { resolvePath } from '../utils/pathHelper';
+
 interface LayoutProps {
     children: any;
 }
@@ -8,10 +10,10 @@ export function Layout({ children }: LayoutProps) {
             <header>
                 <h1>将棋棋譜ログ</h1>
                 <nav>
-                    <a href="/" class="nav-link">
+                    <a href={resolvePath('/')} class="nav-link">
                         棋譜一覧
                     </a>
-                    <a href="/statistics.html" class="nav-link">
+                    <a href={resolvePath('/statistics.html')} class="nav-link">
                         対戦成績
                     </a>
                 </nav>

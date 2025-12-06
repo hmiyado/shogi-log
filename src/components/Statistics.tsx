@@ -2,6 +2,8 @@ import { useState, useEffect } from 'preact/hooks';
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
 
+import { resolvePath } from '../utils/pathHelper';
+
 interface OpponentStats {
     wins: number;
     losses: number;
@@ -105,7 +107,7 @@ export function StatisticsView() {
                                         <tr
                                             key={opponent}
                                             class="clickable"
-                                            onClick={() => window.location.href = `/player.html?name=${encodeURIComponent(opponent)}`}
+                                            onClick={() => window.location.href = resolvePath(`/player.html?name=${encodeURIComponent(opponent)}`)}
                                         >
                                             <td class="font-bold">{opponent}</td>
                                             <td class="text-center">{record.total}</td>

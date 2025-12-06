@@ -3,6 +3,7 @@ import { useState, useEffect } from 'preact/hooks';
 
 import type { KifuMetadata } from '../types/kifu';
 import { loadKifuIndex } from '../utils/dataLoader';
+import { resolvePath } from '../utils/pathHelper';
 
 export function KifuList() {
     const [kifus, setKifus] = useState<KifuMetadata[]>([]);
@@ -19,7 +20,7 @@ export function KifuList() {
     }, []);
 
     const handleKifuClick = (kifu: KifuMetadata) => {
-        window.location.href = `/viewer.html?id=${kifu.id}&date=${kifu.date}`;
+        window.location.href = resolvePath(`/viewer.html?id=${kifu.id}&date=${kifu.date}`);
     };
 
     // 検索フィルター

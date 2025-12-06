@@ -77,35 +77,41 @@ export function KifuList() {
                 </p>
             ) : (
                 <>
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                            gap: 'var(--spacing-lg)',
-                        }}
-                    >
-                        {currentKifus.map((kifu) => (
-                            <div
-                                key={`${kifu.id}-${kifu.date}`}
-                                class="card"
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => handleKifuClick(kifu)}
-                            >
-                                <div class="text-muted mb-sm">{kifu.date}</div>
-                                <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--spacing-sm)' }}>
-                                    {kifu.sente} vs {kifu.gote}
-                                </h3>
-                                <div style={{ color: 'var(--color-primary)', fontWeight: '600' }}>
-                                    {kifu.result}
-                                </div>
-                                <div class="text-muted mt-sm">{kifu.moves}手</div>
-                                {kifu.opening && (
-                                    <div class="mt-sm" style={{ fontSize: 'var(--font-size-sm)' }}>
-                                        戦型: {kifu.opening}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                    <div class="kifu-list-container" style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '2px solid var(--color-border)' }}>
+                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'left' }}>日付</th>
+                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'left' }}>先手</th>
+                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'center' }}>vs</th>
+                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'left' }}>後手</th>
+                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'left' }}>結果</th>
+                                    <th style={{ padding: 'var(--spacing-sm)', textAlign: 'right' }}>手数</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentKifus.map((kifu) => (
+                                    <tr
+                                        key={`${kifu.id}-${kifu.date}`}
+                                        onClick={() => handleKifuClick(kifu)}
+                                        style={{
+                                            borderBottom: '1px solid var(--color-border)',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.2s',
+                                        }}
+                                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)')}
+                                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                    >
+                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)' }}>{kifu.date}</td>
+                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', fontWeight: 'bold' }}>{kifu.sente}</td>
+                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', textAlign: 'center', color: 'var(--color-text-muted)' }}>vs</td>
+                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', fontWeight: 'bold' }}>{kifu.gote}</td>
+                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', color: 'var(--color-primary)' }}>{kifu.result}</td>
+                                        <td style={{ padding: 'var(--spacing-md) var(--spacing-sm)', textAlign: 'right' }}>{kifu.moves}手</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
                     {/* ページネーション */}

@@ -294,7 +294,7 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
             {/* コントロール */}
             <div class="board-controls">
                 <button class="btn" onClick={previousMove} disabled={currentMoveIndex === 0}>
-                    ◀ 前へ
+                    {isMobile ? '◀' : '◀ 前へ'}
                 </button>
                 <div class="move-info">
                     {currentMoveIndex} / {moves.length - 1}手
@@ -304,7 +304,7 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
                     onClick={nextMove}
                     disabled={currentMoveIndex >= moves.length - 1}
                 >
-                    次へ ▶
+                    {isMobile ? '▶' : '次へ ▶'}
                 </button>
             </div>
         </div>

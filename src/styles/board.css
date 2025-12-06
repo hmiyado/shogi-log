@@ -152,6 +152,21 @@
     flex-wrap: wrap;
 }
 
+@media (max-width: 768px) {
+    .board-controls {
+        flex-wrap: nowrap;
+        width: 100%;
+        justify-content: space-between;
+        padding: 0 var(--spacing-sm);
+        box-sizing: border-box;
+    }
+
+    .move-info {
+        min-width: auto;
+        font-size: var(--font-size-base);
+    }
+}
+
 .move-info {
     font-size: var(--font-size-lg);
     font-weight: 600;

@@ -88,7 +88,6 @@ export function StatisticsView() {
             {/* 対戦相手別成績 */}
             {opponentStats.length > 0 && (
                 <>
-                    <h3 class="mb-md">対戦相手別成績</h3>
                     <div class="card table-container">
                         <table class="data-table">
                             <thead>

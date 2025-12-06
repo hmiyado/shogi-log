@@ -5,7 +5,7 @@ import type { JKFData } from '../types/kifu';
 
 interface KifuViewerProps {
     id: string;
-    date: string;
+    date?: string; // date is now optional
 }
 
 export function KifuViewer({ id, date }: KifuViewerProps) {
@@ -14,9 +14,11 @@ export function KifuViewer({ id, date }: KifuViewerProps) {
     const [error, setError] = useState(false);
 
     useEffect(() => {
+        setLoading(true); // Reset loading state when id changes
         loadKifu(id, date).then((data) => {
             if (data) {
                 setKifuData(data);
+                setError(false);
             } else {
                 setError(true);
             }

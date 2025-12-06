@@ -20,7 +20,7 @@ export function KifuList() {
     }, []);
 
     const handleKifuClick = (kifu: KifuMetadata) => {
-        window.location.href = resolvePath(`/viewer.html?id=${kifu.id}&date=${kifu.date}`);
+        window.location.href = resolvePath(`/viewer.html?id=${kifu.id}`);
     };
 
     // 検索フィルター

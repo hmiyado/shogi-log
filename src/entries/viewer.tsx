@@ -6,7 +6,7 @@ import '../styles/index.css';
 function App() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id') || '';
-    const date = params.get('date') || '';
+    const date = params.get('date') || undefined;
 
     return (
         <Layout>

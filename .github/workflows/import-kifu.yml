@@ -1,0 +1,75 @@
+name: Import Kifu from Issue
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  import:
+    if: contains(github.event.issue.labels.*.name, 'kifu')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        with:
+          version: 9
+
+      - name: Use Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Extract URL
+        id: extract
+        shell: bash
+        run: |
+          URL=$(echo "${{ github.event.issue.body }}" | grep -o 'https://shogiwars\.heroz\.jp/games/[a-zA-Z0-9_-]*' | head -1)
+          if [[ -z "$URL" ]]; then
+            echo "::error::No Shogi Wars URL found in issue body"
+            exit 1
+          fi
+          echo "Found URL: $URL"
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Fetch and Convert Kifu
+        run: pnpm tsx scripts/fetch-shogiwars.ts ${{ steps.extract.outputs.url }}
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add public/kifus
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "feat(kifu): import from issue #${{ github.event.issue.number }}"
+            git push
+          fi
+
+      - name: Comment and Close Issue
+        if: success()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ 棋譜のインポートが完了しました！\n\nGitHub Pagesのデプロイが完了次第、一覧に表示されます。'
+            });
+            github.rest.issues.update({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed'
+            });

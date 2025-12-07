@@ -194,7 +194,6 @@
     .captured-pieces {
         width: min(400px, 90vw);
         height: auto;
-        /* モバイルでは高さを自動調整 */
     }
 
     .captured-list {
@@ -202,6 +201,10 @@
         flex-wrap: wrap;
         justify-content: flex-start;
         overflow-y: visible;
+        display: flex;
+        align-items: center;
+        /* 1行分の高さ（駒の高さ + 余白）を余裕を持って確保してガタつき防止 */
+        min-height: calc((min(400px, 90vw) / 9 * 0.7) + 16px);
     }
 
     .captured-piece-image {

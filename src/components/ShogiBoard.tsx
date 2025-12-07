@@ -210,12 +210,20 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
     const renderBoard = () => {
         const cells = [];
         const boardState = shogi.board;
+        const lastMove = currentMoveIndex > 0 ? moves[currentMoveIndex].move : null;
 
         for (let y = 1; y <= 9; y++) {
             for (let x = 9; x >= 1; x--) {
                 const piece = boardState[x - 1][y - 1];
+                const isLastMoveTo = lastMove && lastMove.to && lastMove.to.x === x && lastMove.to.y === y;
+
                 cells.push(
-                    <div key={`${x}-${y}`} class="board-cell" data-x={x} data-y={y}>
+                    <div
+                        key={`${x}-${y}`}
+                        class={`board-cell ${isLastMoveTo ? 'highlight' : ''}`}
+                        data-x={x}
+                        data-y={y}
+                    >
                         {piece && (
                             <img
                                 src={getPieceImageUrl(piece.kind, piece.color)}

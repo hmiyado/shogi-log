@@ -132,60 +132,58 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
     };
 
     // 持ち駒を描画
-    const renderCapturedPieces = (color: number, playerName: string) => {
-        const hands = shogi.hands[color];
+    const renderCapturedPieces = (color: number) => {
+        const hands = shogi.hands[color] as any;
         const pieces = [];
 
-        console.log(`持ち駒 (color ${color}):`, hands);
-
         // 駒の並び順を定義（歩、香、桂、銀、金、角、飛）
-        const pieceOrder = ['FU', 'KY', 'KE', 'GI', 'KI', 'KA', 'HI'];
+        const order = ['FU', 'KY', 'KE', 'GI', 'KI', 'KA', 'HI'];
 
-        // モバイル（768px以下）では両方同じ順序、デスクトップでは後手は逆順
-        const displayOrder = (color === 1 && !isMobile) ? [...pieceOrder].reverse() : pieceOrder;
-
-        // handsは配列形式: [{kind: 'FU', color: 0}, ...]
+        // shogi.hands[color] は配列形式なのでカウントする
+        const counts: { [kind: string]: number } = {};
         if (Array.isArray(hands)) {
-            // 駒の種類ごとにカウント
-            const pieceCounts: { [key: string]: number } = {};
-            hands.forEach((piece: any) => {
-                const kind = piece.kind;
-                pieceCounts[kind] = (pieceCounts[kind] || 0) + 1;
+            hands.forEach((p: any) => {
+                counts[p.kind] = (counts[p.kind] || 0) + 1;
             });
+        }
 
-            // 定義された順序で駒を表示
-            for (const pieceKind of displayOrder) {
-                const count = pieceCounts[pieceKind];
-                if (count && count > 0) {
-                    pieces.push(
-                        <div key={pieceKind} class="captured-piece-item">
-                            <img
-                                src={getPieceImageUrl(pieceKind, color)}
-                                alt={getPieceName(pieceKind)}
-                                class="captured-piece-image"
-                            />
-                            {count > 1 && <span class="piece-count">{count}</span>}
-                        </div>
-                    );
-                }
+        for (const kind of order) {
+            if (counts[kind] > 0) {
+                pieces.push({ kind, count: counts[kind] });
             }
         }
 
-        const mark = color === 0 ? '☗' : '☖';
-
         return (
             <div class="captured-pieces">
-                <h3 title={playerName} style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                }}>
-                    <span style={{ fontSize: '120%', marginRight: '4px' }}>{mark}</span>
-                    {playerName}
-                </h3>
-                <div class="captured-list">{pieces.length > 0 ? pieces : <span class="no-pieces">なし</span>}</div>
+                <div class="captured-list">
+                    {pieces.length === 0 ? (
+                        <div class="no-pieces">なし</div>
+                    ) : (
+                        pieces.map((item) => (
+                            <div key={item.kind} class="captured-piece-item">
+                                <img
+                                    src={getPieceImageUrl(item.kind, color)}
+                                    alt={getPieceName(item.kind)}
+                                    class="captured-piece-image"
+                                />
+                                {item.count > 1 && <span class="piece-count">{item.count}</span>}
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
         );
+    };
+
+    const getPlayerName = (color: number) => {
+        const header = kifuData.header;
+        if (color === 0) {
+            const name = header['先手'] || header['Sente'];
+            return name || '先手';
+        } else {
+            const name = header['後手'] || header['Gote'];
+            return name || '後手';
+        }
     };
 
     return (
@@ -223,23 +221,37 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
 
             {/* 盤面エリア */}
             <div class="board-wrapper">
-                {renderCapturedPieces(1, kifuData.header['後手'] || '後手')}
-                <div
-                    class="shogi-board"
-                    onClick={(e) => {
-                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const width = rect.width;
-                        if (x > width / 2) {
-                            nextMove();
-                        } else {
-                            previousMove();
-                        }
-                    }}
-                >
-                    {renderBoard()}
+                {renderCapturedPieces(1)}
+
+                <div class="board-main-column">
+                    <div class="player-info gote text-left">
+                        <span class="player-mark">☖</span>
+                        {getPlayerName(1)}
+                    </div>
+
+                    <div
+                        class="shogi-board"
+                        onClick={(e) => {
+                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                            const x = e.clientX - rect.left;
+                            const width = rect.width;
+                            if (x > width / 2) {
+                                nextMove();
+                            } else {
+                                previousMove();
+                            }
+                        }}
+                    >
+                        {renderBoard()}
+                    </div>
+
+                    <div class="player-info sente text-right">
+                        <span class="player-mark">☗</span>
+                        {getPlayerName(0)}
+                    </div>
                 </div>
-                {renderCapturedPieces(0, kifuData.header['先手'] || '先手')}
+
+                {renderCapturedPieces(0)}
             </div>
 
             {/* コントロール */}

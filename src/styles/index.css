@@ -119,6 +119,12 @@ main {
   padding: var(--spacing-xl);
 }
 
+@media (max-width: 768px) {
+  main {
+    padding: var(--spacing-sm);
+  }
+}
+
 /* カード */
 .card {
   background-color: var(--color-bg-secondary);

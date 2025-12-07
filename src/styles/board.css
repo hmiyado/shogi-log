@@ -178,40 +178,114 @@
 
 /* レスポンシブ */
 @media (max-width: 768px) {
+    .board-container {
+        padding: 0;
+        /* モバイルは余白を詰める */
+    }
+
     .board-wrapper {
+        flex-direction: row;
+        align-items: stretch;
+        /* 高さを揃える */
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+    }
+
+    /* 先手（下/右側）の持ち駒は下揃え */
+    /* 先手（下/右側）の持ち駒は下揃え */
+    .captured-pieces:last-child .captured-list {
+        justify-content: flex-end;
+    }
+
+    /* 持ち駒エリア（左右に配置） */
+    .captured-pieces {
+        width: 11%;
+        min-width: 30px;
+        max-width: 50px;
+        height: auto;
+        aspect-ratio: auto;
+        padding: 5px 0;
+        border: none;
+        background-color: transparent;
+    }
+
+    .captured-pieces h3 {
+        display: none;
+    }
+
+    /* 持ち駒リストを縦並びに */
+    .captured-list {
         flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
         align-items: center;
+        gap: 2px;
+        min-height: auto;
+        display: flex;
+        width: 100%;
+        /* 親要素に合わせる */
+        overflow-y: hidden;
+    }
+
+    .captured-piece-item {
+        margin: 2px 0;
+    }
+
+    /* 盤面 */
+    /* 左右の持ち駒エリア(11%*2)とギャップ分を引いた残り */
+    .board-main-column {
+        width: 78%;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
     }
 
     .shogi-board {
-        width: min(400px, 90vw);
-    }
-
-    .piece {
-        font-size: var(--font-size-base);
-    }
-
-    /* 狭い画面では持ち駒を横並びに */
-    .captured-pieces {
-        width: min(400px, 90vw);
+        width: 100%;
         height: auto;
     }
 
-    .captured-list {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        overflow-y: visible;
+    .player-info {
+        font-size: var(--font-size-sm);
+        font-weight: bold;
         display: flex;
         align-items: center;
-        /* 1行分の高さ（駒の高さ + 余白）を余裕を持って確保してガタつき防止 */
-        min-height: calc((min(400px, 90vw) / 9 * 0.7) + 16px);
+        gap: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .player-info.text-left {
+        justify-content: flex-start;
+    }
+
+    .player-info.text-right {
+        justify-content: flex-end;
+    }
+
+    .player-mark {
+        font-size: 1.2em;
+    }
+
+    .piece {
+        font-size: var(--font-size-sm);
     }
 
     .captured-piece-image {
-        /* モバイルでは盤のサイズに合わせる */
-        width: calc(min(400px, 90vw) / 9 * 0.7);
-        height: calc(min(400px, 90vw) / 9 * 0.7);
+        /* モバイルでは盤の駒(cell * 0.9)と同じサイズに合わせる */
+        /* 盤の幅は画面幅の約78% */
+        width: calc((100vw - 16px) * 0.78 / 9 * 0.9);
+        height: auto;
+    }
+
+    .piece-count {
+        bottom: -2px;
+        right: -2px;
+        padding: 1px 4px;
+        font-size: 10px;
+        min-width: 14px;
     }
 }
 

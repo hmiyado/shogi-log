@@ -5,44 +5,75 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
+    padding: 0;
+    /* 余白なし */
 }
 
+/* 全画面共通レイアウト: [後手持ち駒] - [盤] - [先手持ち駒] */
 .board-wrapper {
     display: flex;
-    gap: var(--spacing-lg);
-    align-items: flex-start;
+    flex-direction: row;
+    gap: 5px;
+    align-items: stretch;
+    /* 高さを揃える */
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+    /* PCでの最大幅を制限 */
 }
 
 /* 持ち駒エリア */
 .captured-pieces {
-    background-color: var(--color-bg-tertiary);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-md);
-    min-width: 120px;
-    /* 盤と同じ高さに（458x500の比率） */
-    height: calc(min(458px, 80vw) * (500 / 458));
+    width: 11%;
+    min-width: 30px;
+    max-width: 50px;
+    height: auto;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
+    padding: 5px 0;
+    border: none;
+    background-color: transparent;
 }
 
 .captured-pieces h3 {
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--spacing-sm);
-    color: var(--color-text-light);
-    flex-shrink: 0;
+    display: none;
+    /* タイトル非表示 */
 }
 
+/* 持ち駒リスト */
 .captured-list {
     display: flex;
     flex-direction: column;
-    /* デフォルトは縦並び */
-    gap: var(--spacing-xs);
-    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 2px;
+    align-items: center;
+    width: 100%;
+    overflow-y: hidden;
+    min-height: auto;
+    /* 先手（右側）の場合は下寄せにするため flex: 1 を確保 */
     flex: 1;
-    overflow-y: auto;
+}
+
+/* デフォルトは上寄せ（後手） */
+.captured-list {
+    justify-content: flex-start;
+}
+
+/* 先手（右側）の持ち駒は下揃え */
+.captured-pieces:last-child .captured-list {
+    justify-content: flex-end;
+}
+
+/* 盤面カラム */
+.board-main-column {
+    flex: 1;
+    /* 残りの幅を占める */
+    display: flex;
+    flex-direction: column;
+    /* 上下に対局者名を配置 */
+    gap: 4px;
+    max-width: 100%;
+    /* 親のmax-widthに収まるように */
 }
 
 /* 盤面 */
@@ -56,12 +87,10 @@
     background-repeat: no-repeat;
     border: 3px solid #8b6914;
     box-shadow: var(--shadow-lg);
-    /* 458x500の比率 */
     aspect-ratio: 458 / 500;
-    width: min(458px, 80vw);
+    width: 100%;
     height: auto;
-    /* 盤の画像の余白を考慮したパディング */
-    padding: 5px;
+    padding: 1%;
     box-sizing: border-box;
 }
 
@@ -72,6 +101,8 @@
     cursor: pointer;
     transition: background-color 0.15s;
     position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .board-cell:hover {
@@ -92,57 +123,72 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
-/* 持ち駒の駒（テキスト表示） */
-.captured-list .piece {
-    width: auto;
-    height: auto;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--font-size-base);
-    font-weight: 700;
-    color: var(--color-text);
-    background-color: var(--color-bg-secondary);
-    border: 2px solid var(--color-board-dark);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
-    user-select: none;
-}
-
 /* 持ち駒アイテム */
 .captured-piece-item {
     position: relative;
     display: inline-block;
-    margin: var(--spacing-xs);
+    margin: 2px 0;
+    width: 55%;
+    /* コンテナ幅の55%（盤上の駒サイズに近似） */
+    text-align: center;
 }
 
 .captured-piece-image {
-    /* 盤の駒と同じサイズに（盤の幅 / 9 * 0.7） */
-    width: calc(min(458px, 80vw) / 9 * 0.7);
-    height: calc(min(458px, 80vw) / 9 * 0.7);
+    /* 親要素(.captured-piece-item)に合わせる */
+    width: 100%;
+    max-width: 100%;
+    height: auto;
     object-fit: contain;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .piece-count {
     position: absolute;
-    bottom: -5px;
-    right: -5px;
+    bottom: -2px;
+    right: -2px;
     background-color: var(--color-primary);
     color: white;
-    font-size: var(--font-size-sm);
+    font-size: 10px;
     font-weight: bold;
-    padding: 2px 6px;
+    padding: 1px 4px;
     border-radius: 10px;
-    min-width: 20px;
+    min-width: 14px;
     text-align: center;
 }
 
 .no-pieces {
     color: var(--color-text-light);
     font-size: var(--font-size-sm);
+    display: none;
+    /* スペース節約のため非表示 */
 }
+
+/* 対局者情報 */
+.player-info {
+    font-size: var(--font-size-sm);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 1.5em;
+    /* 高さを確保 */
+}
+
+.player-info.text-left {
+    justify-content: flex-start;
+}
+
+.player-info.text-right {
+    justify-content: flex-end;
+}
+
+.player-mark {
+    font-size: 1.2em;
+}
+
 
 /* コントロール */
 .board-controls {
@@ -174,119 +220,6 @@
     color: var(--color-primary);
     min-width: 120px;
     text-align: center;
-}
-
-/* レスポンシブ */
-@media (max-width: 768px) {
-    .board-container {
-        padding: 0;
-        /* モバイルは余白を詰める */
-    }
-
-    .board-wrapper {
-        flex-direction: row;
-        align-items: stretch;
-        /* 高さを揃える */
-        justify-content: center;
-        gap: 5px;
-        width: 100%;
-    }
-
-    /* 先手（下/右側）の持ち駒は下揃え */
-    /* 先手（下/右側）の持ち駒は下揃え */
-    .captured-pieces:last-child .captured-list {
-        justify-content: flex-end;
-    }
-
-    /* 持ち駒エリア（左右に配置） */
-    .captured-pieces {
-        width: 11%;
-        min-width: 30px;
-        max-width: 50px;
-        height: auto;
-        aspect-ratio: auto;
-        padding: 5px 0;
-        border: none;
-        background-color: transparent;
-    }
-
-    .captured-pieces h3 {
-        display: none;
-    }
-
-    /* 持ち駒リストを縦並びに */
-    .captured-list {
-        flex-direction: column;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 2px;
-        min-height: auto;
-        display: flex;
-        width: 100%;
-        /* 親要素に合わせる */
-        overflow-y: hidden;
-    }
-
-    .captured-piece-item {
-        margin: 2px 0;
-    }
-
-    /* 盤面 */
-    /* 左右の持ち駒エリア(11%*2)とギャップ分を引いた残り */
-    .board-main-column {
-        width: 78%;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .shogi-board {
-        width: 100%;
-        height: auto;
-    }
-
-    .player-info {
-        font-size: var(--font-size-sm);
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .player-info.text-left {
-        justify-content: flex-start;
-    }
-
-    .player-info.text-right {
-        justify-content: flex-end;
-    }
-
-    .player-mark {
-        font-size: 1.2em;
-    }
-
-    .piece {
-        font-size: var(--font-size-sm);
-    }
-
-    .captured-piece-image {
-        /* モバイルでは盤の駒(cell * 0.9)と同じサイズに合わせる */
-        /* 盤の幅は画面幅の約78% */
-        width: calc((100vw - 16px) * 0.78 / 9 * 0.9);
-        height: auto;
-    }
-
-    .piece-count {
-        bottom: -2px;
-        right: -2px;
-        padding: 1px 4px;
-        font-size: 10px;
-        min-width: 14px;
-    }
 }
 
 .toast-notification {

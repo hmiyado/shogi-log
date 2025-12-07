@@ -209,8 +209,14 @@
     }
 
     .move-info {
-        min-width: auto;
+        flex: 1;
+        min-width: 0;
         font-size: var(--font-size-base);
+        margin: 0 var(--spacing-sm);
+    }
+
+    .move-select {
+        width: 100%;
     }
 }
 

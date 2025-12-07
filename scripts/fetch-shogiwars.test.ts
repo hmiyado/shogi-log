@@ -89,8 +89,8 @@ describe('fetch-shogiwars', () => {
                     gote: 'player2',
                     result: 'SENTE_WIN_TORYO',
                     moves: [
-                        { t: 175, n: 0, m: '+7968KI' },
-                        { t: 164, n: 1, m: '-0067KE' }
+                        { t: 175, n: 0, m: '+7968GI' },
+                        { t: 164, n: 1, m: '-0055KE' }
                     ]
                 }
             };
@@ -103,7 +103,7 @@ describe('fetch-shogiwars', () => {
             expect(result.header['結果']).toBe('先手勝ち');
             expect(result.moves).toHaveLength(3); // 0手目 + 2手
             expect(result.moves[0]).toEqual({});
-            expect(result.moves[1].move?.piece).toBe('KI');
+            expect(result.moves[1].move?.piece).toBe('GI');
             expect(result.moves[1].time?.now).toBe(175);
             expect(result.moves[2].move?.piece).toBe('KE');
         });

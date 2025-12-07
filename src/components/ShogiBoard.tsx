@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import type { JKFData } from '../types/kifu';
-import { getPieceName } from '../utils/gameLogic';
+import { getPieceName, formatMove } from '../utils/gameLogic';
 import { useShogiGame } from '../hooks/useShogiGame';
 import '../styles/board.css';
 
@@ -260,7 +260,27 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
                     {isMobile ? '◀' : '◀ 前へ'}
                 </button>
                 <div class="move-info">
-                    {currentMoveIndex} / {moves.length - 1}手
+                    <select
+                        class="move-select"
+                        value={currentMoveIndex}
+                        onChange={(e) => {
+                            const index = parseInt((e.target as HTMLSelectElement).value, 10);
+                            resetToMove(index);
+                        }}
+                    >
+                        {moves.map((moveData, index) => {
+                            if (index === 0) {
+                                return <option key={0} value={0}>開始局面</option>;
+                            }
+                            const prevMove = moves[index - 1]?.move;
+                            const moveStr = formatMove(moveData.move, prevMove);
+                            return (
+                                <option key={index} value={index}>
+                                    {index}: {moveStr}
+                                </option>
+                            );
+                        })}
+                    </select>
                 </div>
                 <button
                     class="btn"

@@ -218,8 +218,55 @@
     font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--color-primary);
-    min-width: 120px;
+    min-width: 140px;
+    /* 少し広げる */
     text-align: center;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.move-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 4px 24px 4px 8px;
+    /* 右側に矢印スペース */
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    max-width: 100%;
+
+    /* 矢印アイコン */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    background-size: 16px;
+}
+
+.move-select:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.move-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(235, 97, 35, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+    .move-select {
+        /* ダークモード用の矢印色調整 (stroke='white') */
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    }
+
+    .move-select:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
 }
 
 .toast-notification {

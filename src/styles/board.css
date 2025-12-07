@@ -216,13 +216,14 @@
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: var(--color-primary);
-    color: white;
+    background-color: #eedd77;
+    color: var(--color-text);
     padding: 10px 20px;
     border-radius: 4px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     font-size: 14px;
+    font-weight: bold;
     animation: fadeIn 0.3s ease-out;
 }
 

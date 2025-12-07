@@ -227,6 +227,16 @@ main {
   transition: background-color 0.2s;
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
 .data-table tr.clickable {
   cursor: pointer;
 }

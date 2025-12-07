@@ -25,9 +25,19 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
     });
     const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
     const moves = kifuData.moves;
 
-    // ウィンドウリサイズ時に画面幅を監視
+    // ... (existing useEffects)
+
+    // ... (existing helper functions)
+
+    const showToast = (message: string) => {
+        setToastMessage(message);
+        setTimeout(() => setToastMessage(null), 3000);
+    };
+
+
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
@@ -278,10 +288,36 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
     };
 
     return (
-        <div class="board-container">
+        <div class="board-container" style={{ position: 'relative' }}>
+            {/* トースト通知 */}
+            {toastMessage && (
+                <div class="toast-notification">
+                    {toastMessage}
+                </div>
+            )}
+
             {/* ヘッダー情報 (コンパクト化) */}
-            <div class="text-center mb-md text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
-                {kifuData.header['棋戦'] || '対局'} | {kifuData.header['開始日時'] || '不明'}
+            <div class="text-center mb-md text-muted" style={{ fontSize: 'var(--font-size-sm)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                <span>{kifuData.header['棋戦'] || '対局'} | {kifuData.header['開始日時'] || '不明'}</span>
+                <button
+                    type="button"
+                    class="btn btn-sm"
+                    onClick={async () => {
+                        try {
+                            const { exportKIF } = await import('../utils/kifuExporter');
+                            const kif = exportKIF(kifuData);
+                            await navigator.clipboard.writeText(kif);
+                            showToast('棋譜(KIF)をコピーしました');
+                        } catch (e) {
+                            console.error('Failed to copy kifu:', e);
+                            showToast('棋譜のコピーに失敗しました');
+                        }
+                    }}
+                    title="KIF形式でコピー"
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                    📋 棋譜
+                </button>
             </div>
 
             {/* 盤面エリア */}

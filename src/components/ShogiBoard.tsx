@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
-import { Shogi } from 'shogi.js';
-import type { JKFData, JKFMoveData } from '../types/kifu';
+import type { JKFData } from '../types/kifu';
 import { getPieceName } from '../utils/gameLogic';
+import { useShogiGame } from '../hooks/useShogiGame';
 import '../styles/board.css';
 
 interface ShogiBoardProps {
@@ -9,34 +9,15 @@ interface ShogiBoardProps {
 }
 
 export function ShogiBoard({ kifuData }: ShogiBoardProps) {
-    const [shogi, setShogi] = useState<Shogi>(() => {
-        // 初期局面がある場合はSFENから初期化
-        const initial = (kifuData as any).initial;
-        const shogi = new Shogi();
-        if (initial?.data?.sfen) {
-            try {
-                shogi.initializeFromSFENString(initial.data.sfen);
-            } catch (error) {
-                console.error('Failed to initialize from SFEN:', error);
-                shogi.initialize();
-            }
-        }
-        return shogi;
-    });
-    const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+    const { shogi, currentMoveIndex, nextMove, previousMove, resetToMove } = useShogiGame(kifuData);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const moves = kifuData.moves;
-
-    // ... (existing useEffects)
-
-    // ... (existing helper functions)
 
     const showToast = (message: string) => {
         setToastMessage(message);
         setTimeout(() => setToastMessage(null), 3000);
     };
-
 
     useEffect(() => {
         const handleResize = () => {
@@ -54,10 +35,10 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
         if (moveParam) {
             const moveIndex = parseInt(moveParam, 10);
             if (!isNaN(moveIndex) && moveIndex >= 0 && moveIndex < moves.length) {
-                setCurrentMoveIndex(moveIndex);
+                resetToMove(moveIndex);
             }
         }
-    }, []);
+    }, [kifuData]); // kifuDataが変わったときも再チェック
 
     // 手数が変わったらURLを更新
     useEffect(() => {
@@ -69,114 +50,26 @@ export function ShogiBoard({ kifuData }: ShogiBoardProps) {
         }
         const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
         window.history.replaceState({}, '', newUrl);
-
-        // 手数が変わったら盤面を更新
-        resetToMove(currentMoveIndex);
     }, [currentMoveIndex]);
 
     // キーボード操作
     useEffect(() => {
+        // キーボード操作のリセットは不要、現在のcurrentMoveIndexに基づいてnext/prevを呼ぶ
+        // ただし、フックから返される nextMove/previousMove は内部で currentMoveIndex を参照しているため
+        // このEffect自体は nextMove/previousMove が変わらない限り再実行されなくてよい
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowLeft') {
                 e.preventDefault();
-                if (currentMoveIndex > 0) {
-                    setCurrentMoveIndex(currentMoveIndex - 1);
-                }
+                previousMove();
             } else if (e.key === 'ArrowRight') {
                 e.preventDefault();
-                if (currentMoveIndex < moves.length - 1) {
-                    setCurrentMoveIndex(currentMoveIndex + 1);
-                }
+                nextMove();
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [currentMoveIndex, moves.length]);
-
-    // 局面をリセット
-    const resetToMove = (moveIndex: number) => {
-        // 初期局面から開始
-        const initial = (kifuData as any).initial;
-        const newShogi = new Shogi();
-
-        if (initial?.data?.sfen) {
-            try {
-                newShogi.initializeFromSFENString(initial.data.sfen);
-            } catch (error) {
-                console.error('Failed to initialize from SFEN:', error);
-                newShogi.initialize();
-            }
-        }
-
-        // 指定された手数まで進める
-        for (let i = 1; i <= moveIndex; i++) {
-            const move = moves[i];
-            if (move.move) {
-                try {
-                    applyMove(newShogi, move);
-                } catch (error) {
-                    console.error('Error resetting to move:', error);
-                    break;
-                }
-            }
-        }
-        setShogi(newShogi);
-    };
-
-    // 手を適用
-    const applyMove = (shogiInstance: Shogi, moveData: JKFMoveData) => {
-        const move = moveData.move;
-        if (!move) return;
-
-        if (move.from) {
-            const pieceAtSource = shogiInstance.get(move.from.x, move.from.y);
-            let shouldPromote = move.promote;
-
-            // プロモーションフラグがない場合、駒の種類が変わっているかチェックして自動判定
-            if (!shouldPromote && pieceAtSource) {
-                const boardPieceKind = pieceAtSource.kind;
-                const movePieceKind = move.piece;
-
-                // 成り駒への変化マッピング
-                const promotionMap: { [key: string]: string } = {
-                    'FU': 'TO',
-                    'KY': 'NY',
-                    'KE': 'NK',
-                    'GI': 'NG',
-                    'KA': 'UM',
-                    'HI': 'RY',
-                };
-
-                // 盤上の駒が成れる種類で、かつ移動後の駒種が成った後のものである場合
-                if (promotionMap[boardPieceKind] === movePieceKind) {
-                    shouldPromote = true;
-                }
-            }
-
-            shogiInstance.move(move.from.x, move.from.y, move.to.x, move.to.y, shouldPromote || false);
-        } else {
-            shogiInstance.drop(move.to.x, move.to.y, move.piece as any);
-        }
-    };
-
-    // 次の手
-    const nextMove = () => {
-        if (currentMoveIndex < moves.length - 1) {
-            const nextIndex = currentMoveIndex + 1;
-            resetToMove(nextIndex);
-            setCurrentMoveIndex(nextIndex);
-        }
-    };
-
-    // 前の手
-    const previousMove = () => {
-        if (currentMoveIndex > 0) {
-            const prevIndex = currentMoveIndex - 1;
-            resetToMove(prevIndex);
-            setCurrentMoveIndex(prevIndex);
-        }
-    };
+    }, [nextMove, previousMove]); // フックの関数依存
 
     // 駒の画像URLを取得
     const getPieceImageUrl = (pieceKind: string, color: number) => {

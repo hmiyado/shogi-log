@@ -16,4 +16,8 @@ export default defineConfig(({ command }) => ({
             },
         },
     },
+    test: {
+        include: ['**/*.test.{js,ts,jsx,tsx}'],
+        environment: 'happy-dom',
+    },
 }))

@@ -46,6 +46,10 @@ export interface JKFData {
     header: JKFHeader;
     initial?: {
         preset: string;
+        data?: {
+            sfen?: string;
+            [key: string]: any;
+        };
     };
     moves: JKFMoveData[];
 }

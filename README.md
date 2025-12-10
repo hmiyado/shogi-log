@@ -34,6 +34,96 @@ pnpm build
 pnpm preview
 ```
 
+## Git Submodule として使用
+
+このリポジトリをGit submoduleとして別プロジェクトから利用できます。複数のプロジェクトで同じアプリケーションコードを共有しながら、異なる棋譜データを管理する場合に便利です。
+
+### プロジェクトのセットアップ
+
+1. **新しいプロジェクトを作成**
+   ```bash
+   mkdir my-shogi-log
+   cd my-shogi-log
+   git init
+   ```
+
+2. **このリポジトリをsubmoduleとして追加**
+   ```bash
+   git submodule add https://github.com/hmiyado/shogi-log.git app
+   git submodule update --init --recursive
+   ```
+
+3. **棋譜データ用のディレクトリを作成**
+   ```bash
+   mkdir -p public/kifus
+   # public/kifus/ に棋譜データを配置
+   ```
+
+4. **GitHub Actionsワークフローを同期**
+   ```bash
+   ./app/scripts/sync-workflows.sh
+   ```
+
+5. **GitHubにpush**
+   ```bash
+   git add .
+   git commit -m "Initial commit"
+   git push origin main
+   ```
+
+6. **ビルド・デプロイ**
+   - mainブランチにpushすると、自動的にGitHub Pagesにデプロイされます
+
+### ローカルでの開発
+
+```bash
+# 依存関係のインストール
+cd app
+pnpm install
+cd ..
+
+# 開発サーバーの起動（app/ 内で実行）
+cd app
+SHOGI_LOG_SUBMODULE=true pnpm dev
+
+# ビルド（app/ 内で実行）
+SHOGI_LOG_SUBMODULE=true pnpm build
+# → ../dist/ にビルド結果が出力されます
+```
+
+### Submoduleの更新
+
+アプリコードが更新された場合の更新手順：
+
+```bash
+# submoduleを最新に更新
+git submodule update --remote app
+
+# ワークフローを再同期
+./app/scripts/sync-workflows.sh
+
+# コミット
+git add app .github
+git commit -m "Update app submodule"
+git push
+```
+
+### プロジェクト構造
+
+```
+my-shogi-log/
+├── app/                  # submodule (このリポジトリ)
+│   ├── src/
+│   ├── scripts/
+│   ├── .github/workflows/
+│   └── ...
+├── public/
+│   └── kifus/            # プロジェクト固有の棋譜データ
+├── dist/                 # ビルド結果（app/ からビルドすると生成）
+└── .github/
+    └── workflows/        # app/ から同期したワークフロー
+```
+
 ### 棋譜の追加方法
 
 #### 方法1: .kif ファイルから変換（推奨）

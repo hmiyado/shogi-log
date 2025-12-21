@@ -74,7 +74,8 @@ jobs:
       - name: Copy data to app
         if: inputs.data_repo != ''
         run: |
-          cp -r data/public app/public
+          mkdir -p app/public
+          cp -r data/public/. app/public/
 
       - name: Install dependencies
         run: |
@@ -93,6 +94,8 @@ jobs:
           else
             pnpm build
           fi
+        env:
+          BASE_PATH: ${{ inputs.data_repo != '' && format('/{0}/', split(inputs.data_repo, '/')[1]) || '/shogi-log/' }}
 
       - name: Upload artifact
         id: upload

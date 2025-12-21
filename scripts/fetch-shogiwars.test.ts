@@ -100,7 +100,7 @@ describe('fetch-shogiwars', () => {
             expect(result.header['棋戦']).toBe('将棋ウォーズ');
             expect(result.header['先手']).toBe('player1');
             expect(result.header['後手']).toBe('player2');
-            expect(result.header['結果']).toBe('先手勝ち');
+            expect(result.header['結果']).toBe('先手勝ち（投了）');
             expect(result.moves).toHaveLength(3); // 0手目 + 2手
             expect(result.moves[0]).toEqual({});
             expect(result.moves[1].move?.piece).toBe('GI');
@@ -138,7 +138,71 @@ describe('fetch-shogiwars', () => {
 
             const result = convertToJKF(swData);
 
-            expect(result.header['結果']).toBe('後手勝ち');
+            expect(result.header['結果']).toBe('後手勝ち（投了）');
+        });
+
+        it('先手勝ち（詰み）の結果を正しく設定できる', () => {
+            const swData = {
+                gameHash: {
+                    name: 'test-game-20251206_103000',
+                    sente: 'player1',
+                    gote: 'player2',
+                    result: 'SENTE_WIN_CHECKMATE',
+                    moves: []
+                }
+            };
+
+            const result = convertToJKF(swData);
+
+            expect(result.header['結果']).toBe('先手勝ち（詰み）');
+        });
+
+        it('後手勝ち（詰み）の結果を正しく設定できる', () => {
+            const swData = {
+                gameHash: {
+                    name: 'test-game-20251206_103000',
+                    sente: 'player1',
+                    gote: 'player2',
+                    result: 'GOTE_WIN_CHECKMATE',
+                    moves: []
+                }
+            };
+
+            const result = convertToJKF(swData);
+
+            expect(result.header['結果']).toBe('後手勝ち（詰み）');
+        });
+
+        it('先手勝ち（時間切れ）の結果を正しく設定できる', () => {
+            const swData = {
+                gameHash: {
+                    name: 'test-game-20251206_103000',
+                    sente: 'player1',
+                    gote: 'player2',
+                    result: 'SENTE_WIN_TIMEOUT',
+                    moves: []
+                }
+            };
+
+            const result = convertToJKF(swData);
+
+            expect(result.header['結果']).toBe('先手勝ち（時間切れ）');
+        });
+
+        it('後手勝ち（時間切れ）の結果を正しく設定できる', () => {
+            const swData = {
+                gameHash: {
+                    name: 'test-game-20251206_103000',
+                    sente: 'player1',
+                    gote: 'player2',
+                    result: 'GOTE_WIN_TIMEOUT',
+                    moves: []
+                }
+            };
+
+            const result = convertToJKF(swData);
+
+            expect(result.header['結果']).toBe('後手勝ち（時間切れ）');
         });
     });
 

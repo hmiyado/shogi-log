@@ -107,10 +107,26 @@ export function convertToJKF(swData: ShogiWarsData): JKFData {
     };
 
     // 結果を設定
-    if (gameHash.result === 'SENTE_WIN_TORYO') {
-        header['結果'] = '先手勝ち';
-    } else if (gameHash.result === 'GOTE_WIN_TORYO') {
-        header['結果'] = '後手勝ち';
+    if (gameHash.result.startsWith('SENTE_WIN')) {
+        if (gameHash.result === 'SENTE_WIN_CHECKMATE') {
+            header['結果'] = '先手勝ち（詰み）';
+        } else if (gameHash.result === 'SENTE_WIN_TORYO') {
+            header['結果'] = '先手勝ち（投了）';
+        } else if (gameHash.result === 'SENTE_WIN_TIMEOUT') {
+            header['結果'] = '先手勝ち（時間切れ）';
+        } else {
+            header['結果'] = '先手勝ち';
+        }
+    } else if (gameHash.result.startsWith('GOTE_WIN')) {
+        if (gameHash.result === 'GOTE_WIN_CHECKMATE') {
+            header['結果'] = '後手勝ち（詰み）';
+        } else if (gameHash.result === 'GOTE_WIN_TORYO') {
+            header['結果'] = '後手勝ち（投了）';
+        } else if (gameHash.result === 'GOTE_WIN_TIMEOUT') {
+            header['結果'] = '後手勝ち（時間切れ）';
+        } else {
+            header['結果'] = '後手勝ち';
+        }
     }
 
     // 初期局面を設定（SFEN形式がある場合）

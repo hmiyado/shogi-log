@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Data (managed by data repositories)
+public/
+kifus-source/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

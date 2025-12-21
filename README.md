@@ -1,12 +1,16 @@
-# 将棋棋譜ログ
+# Shogi Log (Application)
 
-将棋の棋譜を保存・閲覧できるリポジトリです。GitHub Pagesで公開されています。
+将棋の棋譜を保存・閲覧できるWebアプリケーションのコードベースです。
+
+> **Note**: このリポジトリはアプリケーションコードのみを管理します。
+> 棋譜データは別のデータリポジトリで管理してください。
 
 ## 機能
 
 - 📋 **棋譜一覧**: 保存された棋譜を一覧表示
 - ♟️ **棋譜再生**: 盤面で棋譜を再生・確認
 - 📊 **対戦成績**: 勝敗数や勝率などの統計情報を表示
+- 🔄 **GitHub Actions**: Reusable Workflows でデプロイを自動化
 
 ## 技術スタック
 
@@ -15,14 +19,21 @@
 - **pnpm**: 効率的なパッケージ管理
 - **shogi.js**: 将棋のゲームロジック
 - **json-kifu-format**: KIF/CSA形式のパーサー
+- **GitHub Actions**: CI/CD とデプロイ自動化
 
 ## 開発
+
+このリポジトリはアプリケーションコードのみを管理しています。ローカルで開発する場合は、テスト用の棋譜データを配置してください。
 
 ### セットアップ
 
 ```bash
 # 依存関係のインストール
 pnpm install
+
+# テスト用データの配置（開発時のみ）
+mkdir -p public/kifus
+# public/kifus/ に棋譜データ（JKF形式のJSONファイル）を配置
 
 # 開発サーバーの起動
 pnpm dev
@@ -34,95 +45,100 @@ pnpm build
 pnpm preview
 ```
 
-## Git Submodule として使用
+> **Note**: `public/` ディレクトリは `.gitignore` に含まれているため、Git管理されません。
 
-このリポジトリをGit submoduleとして別プロジェクトから利用できます。複数のプロジェクトで同じアプリケーションコードを共有しながら、異なる棋譜データを管理する場合に便利です。
+## データリポジトリとして使用
 
-### プロジェクトのセットアップ
+このリポジトリをアプリケーションコードとして、別のデータリポジトリから **Reusable Workflow** で利用できます。
 
-1. **新しいプロジェクトを作成**
-   ```bash
-   mkdir my-shogi-log
-   cd my-shogi-log
-   git init
-   ```
+### リポジトリ構成
 
-2. **このリポジトリをsubmoduleとして追加**
-   ```bash
-   git submodule add https://github.com/hmiyado/shogi-log.git app
-   git submodule update --init --recursive
-   ```
+- **shogi-log** (このリポジトリ): アプリケーションコード
+- **shogi-log-data** (別リポジトリ): 棋譜データ専用リポジトリ
 
-3. **棋譜データ用のディレクトリを作成**
-   ```bash
-   mkdir -p public/kifus
-   # public/kifus/ に棋譜データを配置
-   ```
+複数のデータリポジトリを作成することで、異なる棋譜セットを独立して管理できます。
 
-4. **GitHub Actionsワークフローを同期**
-   ```bash
-   ./app/scripts/sync-workflows.sh
-   ```
-
-5. **GitHubにpush**
-   ```bash
-   git add .
-   git commit -m "Initial commit"
-   git push origin main
-   ```
-
-6. **ビルド・デプロイ**
-   - mainブランチにpushすると、自動的にGitHub Pagesにデプロイされます
-
-### ローカルでの開発
-
-```bash
-# 依存関係のインストール
-cd app
-pnpm install
-cd ..
-
-# 開発サーバーの起動（app/ 内で実行）
-cd app
-SHOGI_LOG_SUBMODULE=true pnpm dev
-
-# ビルド（app/ 内で実行）
-SHOGI_LOG_SUBMODULE=true pnpm build
-# → ../dist/ にビルド結果が出力されます
-```
-
-### Submoduleの更新
-
-アプリコードが更新された場合の更新手順：
-
-```bash
-# submoduleを最新に更新
-git submodule update --remote app
-
-# ワークフローを再同期
-./app/scripts/sync-workflows.sh
-
-# コミット
-git add app .github
-git commit -m "Update app submodule"
-git push
-```
-
-### プロジェクト構造
+### プロジェクト構成
 
 ```
-my-shogi-log/
-├── app/                  # submodule (このリポジトリ)
-│   ├── src/
-│   ├── scripts/
-│   ├── .github/workflows/
-│   └── ...
-├── public/
-│   └── kifus/            # プロジェクト固有の棋譜データ
-├── dist/                 # ビルド結果（app/ からビルドすると生成）
-└── .github/
-    └── workflows/        # app/ から同期したワークフロー
+shogi-log/              # このリポジトリ（アプリコード）
+├── src/
+├── scripts/
+└── .github/workflows/  # Reusable workflows
+
+shogi-log-data-a/       # データリポジトリA（別リポジトリ）
+├── public/kifus/       # 棋譜データA
+└── .github/workflows/  # トリガー用workflow
+
+shogi-log-data-b/       # データリポジトリB（別リポジトリ）
+├── public/kifus/       # 棋譜データB
+└── .github/workflows/  # トリガー用workflow
 ```
+
+### データリポジトリのセットアップ
+
+データリポジトリのテンプレートを用意してあるので、それをforkまたはテンプレートとして使用してください。
+
+> **テンプレートリポジトリ**: [hmiyado/shogi-log-data-template](https://github.com/hmiyado/shogi-log-data-template) (予定)
+
+**手順:**
+
+1. **テンプレートリポジトリを使用**
+   - GitHub で "Use this template" をクリック、または Fork
+   - リポジトリ名を設定（例: `my-shogi-log-data`）
+
+2. **棋譜データを追加**
+   ```bash
+   git clone https://github.com/your-username/my-shogi-log-data
+   cd my-shogi-log-data
+
+   # public/kifus/ に棋譜データ（JKF形式のJSONファイル）を配置
+   # または、Issueやworkflow_dispatchで追加
+   ```
+
+3. **GitHub Pagesの設定**
+   - Settings > Pages を開く
+   - Source: "GitHub Actions" を選択
+
+4. **デプロイ**
+   - mainブランチにpushすると自動デプロイ
+
+### （オプション）forkしたappリポジトリを使う場合
+
+独自のappリポジトリ（このリポジトリのfork）を使用する場合は、`.github/workflows/deploy.yml` を編集：
+
+```yaml
+jobs:
+  build:
+    uses: your-org/your-shogi-log-fork/.github/workflows/deploy.yml@main
+    with:
+      data_repo: ${{ github.repository }}
+      data_ref: ${{ github.ref_name }}
+      app_repo: 'your-org/your-shogi-log-fork'  # 追加
+      app_ref: 'main'  # または特定のバージョンタグ
+```
+
+### 仕組み
+
+- **データリポジトリ**: 棋譜データのみを管理。mainにpushするとworkflowがトリガー
+- **Reusable Workflow**: appリポジトリのworkflowを呼び出し
+  1. appリポジトリからアプリコードをチェックアウト
+  2. dataリポジトリから棋譜データをチェックアウト
+  3. データをappにコピーしてビルド
+  4. GitHub Pagesにデプロイ
+
+### ワークフローの更新
+
+appリポジトリでworkflowが更新された場合は、自動的に最新版が使われます（`@main`を指定している場合）。
+
+特定のバージョンを使いたい場合は、`@v1.0.0` のようにタグを指定できます。
+
+### メリット
+
+- ✅ **完全な分離**: appとdataが完全に独立したリポジトリ
+- ✅ **シンプル**: submoduleの複雑さがない
+- ✅ **柔軟**: appのバージョン（ブランチ/タグ）を簡単に切り替え
+- ✅ **メンテナンス性**: workflowの本体はapp側に集約、data側は軽量なトリガーのみ
 
 ### 棋譜の追加方法
 

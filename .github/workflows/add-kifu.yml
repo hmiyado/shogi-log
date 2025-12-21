@@ -1,6 +1,29 @@
 name: Add Kifu from Shogi Wars
 
 on:
+  # Reusable workflow として呼び出し可能
+  workflow_call:
+    inputs:
+      data_repo:
+        description: 'Data repository (owner/repo)'
+        required: true
+        type: string
+      url:
+        description: '将棋ウォーズのURL'
+        required: true
+        type: string
+      app_repo:
+        description: 'App repository (owner/repo). If not specified, use the workflow repository'
+        required: false
+        type: string
+        default: ''
+      app_ref:
+        description: 'App repository ref (branch/tag)'
+        required: false
+        type: string
+        default: 'main'
+
+  # スタンドアロン実行
   workflow_dispatch:
     inputs:
       url:
@@ -15,10 +38,27 @@ jobs:
   add-kifu:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      # workflow_call の場合: app と data を別々にチェックアウト
+      - name: Checkout app repository
+        if: inputs.data_repo != ''
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          submodules: true  # Checkout submodules (if using submodule structure)
+          repository: ${{ inputs.app_repo || github.repository }}
+          ref: ${{ inputs.app_ref }}
+          path: app
+
+      - name: Checkout data repository
+        if: inputs.data_repo != ''
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ inputs.data_repo }}
+          path: data
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # スタンドアロン実行の場合
+      - name: Checkout standalone
+        if: inputs.data_repo == ''
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
@@ -30,6 +70,7 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+          cache-dependency-path: ${{ inputs.data_repo != '' && 'app/pnpm-lock.yaml' || 'pnpm-lock.yaml' }}
 
       - name: Install dependencies
         run: |
@@ -43,7 +84,9 @@ jobs:
       - name: Fetch and convert kifu
         run: |
           if [ -d "app" ]; then
-            ./app/node_modules/.bin/tsx app/scripts/fetch-shogiwars.ts "${{ inputs.url }}"
+            mkdir -p data/public/kifus
+            cd data
+            ../app/node_modules/.bin/tsx ../app/scripts/fetch-shogiwars.ts "${{ inputs.url }}"
           else
             pnpm tsx scripts/fetch-shogiwars.ts "${{ inputs.url }}"
           fi
@@ -52,8 +95,11 @@ jobs:
 
       - name: Commit and push
         run: |
+          if [ -d "data" ]; then
+            cd data
+          fi
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add public/kifus/
+          git add public/kifus/ kifus-source
           git diff --staged --quiet || git commit -m "Add kifu from Shogi Wars"
           git push

@@ -86,6 +86,16 @@ jobs:
             pnpm install
           fi
 
+      - name: Extract repository name
+        id: repo-name
+        run: |
+          if [ -n "${{ inputs.data_repo }}" ]; then
+            REPO_NAME=$(echo "${{ inputs.data_repo }}" | cut -d'/' -f2)
+            echo "base_path=/${REPO_NAME}/" >> $GITHUB_OUTPUT
+          else
+            echo "base_path=/shogi-log/" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build
         run: |
           if [ -d "app" ]; then
@@ -95,7 +105,7 @@ jobs:
             pnpm build
           fi
         env:
-          BASE_PATH: ${{ inputs.data_repo != '' && format('/{0}/', split(inputs.data_repo, '/')[1]) || '/shogi-log/' }}
+          BASE_PATH: ${{ steps.repo-name.outputs.base_path }}
 
       - name: Upload artifact
         id: upload

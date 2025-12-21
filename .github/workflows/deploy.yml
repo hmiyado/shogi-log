@@ -66,12 +66,21 @@ jobs:
         with:
           version: 10
 
-      - name: Setup Node
+      - name: Setup Node (with cache for data repo)
+        if: inputs.data_repo != ''
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: 22
           cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+          cache-dependency-path: 'app/pnpm-lock.yaml'
+
+      - name: Setup Node (with cache for standalone)
+        if: inputs.data_repo == ''
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
 
       - name: Copy data to app
         if: inputs.data_repo != ''

@@ -70,7 +70,7 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          cache-dependency-path: ${{ inputs.data_repo != '' && 'app/pnpm-lock.yaml' || 'pnpm-lock.yaml' }}
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: |

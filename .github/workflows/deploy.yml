@@ -71,7 +71,7 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
-          cache-dependency-path: ${{ inputs.data_repo != '' && 'app/pnpm-lock.yaml' || 'pnpm-lock.yaml' }}
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Copy data to app
         if: inputs.data_repo != ''

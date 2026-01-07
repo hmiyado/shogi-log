@@ -26,7 +26,7 @@
     },
     "dependencies": {
         "json-kifu-format": "^3.1.12",
-        "preact": "^10.26.1",
+        "preact": "^10.28.2",
         "preact-iso": "^2.6.3",
         "shogi.js": "^5.4.1"
     }

@@ -4,6 +4,11 @@ on:
   # Reusable workflow として呼び出し可能
   workflow_call:
     inputs:
+      base_path:
+        description: 'Base path for deployment (e.g. / or /repo-name/)'
+        required: false
+        type: string
+        default: ''
       data_repo:
         description: 'Data repository (owner/repo)'
         required: true
@@ -89,7 +94,9 @@ jobs:
       - name: Extract repository name
         id: repo-name
         run: |
-          if [ -n "${{ inputs.data_repo }}" ]; then
+          if [ -n "${{ inputs.base_path }}" ]; then
+            echo "base_path=${{ inputs.base_path }}" >> $GITHUB_OUTPUT
+          elif [ -n "${{ inputs.data_repo }}" ]; then
             REPO_NAME=$(echo "${{ inputs.data_repo }}" | cut -d'/' -f2)
             echo "base_path=/${REPO_NAME}/" >> $GITHUB_OUTPUT
           else

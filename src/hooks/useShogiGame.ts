@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { Shogi } from 'shogi.js';
-import type { JKFData, JKFMoveData } from '../types/kifu';
+import type { JKFData, JKFMoveData, JKFPosition } from '../types/kifu';
 
 export interface UseShogiGameResult {
     shogi: Shogi;
@@ -30,9 +30,12 @@ export function useShogiGame(kifuData: JKFData): UseShogiGameResult {
     const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
 
     // 手を適用する内部関数
-    const applyMove = (shogiInstance: Shogi, moveData: JKFMoveData) => {
+    const applyMove = (shogiInstance: Shogi, moveData: JKFMoveData, prevTo?: JKFPosition) => {
         const move = moveData.move;
         if (!move) return;
+
+        const to = move.to ?? prevTo;
+        if (!to) return;
 
         if (move.from) {
             const pieceAtSource = shogiInstance.get(move.from.x, move.from.y);
@@ -57,9 +60,9 @@ export function useShogiGame(kifuData: JKFData): UseShogiGameResult {
                 }
             }
 
-            shogiInstance.move(move.from.x, move.from.y, move.to.x, move.to.y, shouldPromote || false);
+            shogiInstance.move(move.from.x, move.from.y, to.x, to.y, shouldPromote || false);
         } else {
-            shogiInstance.drop(move.to.x, move.to.y, move.piece as any);
+            shogiInstance.drop(to.x, to.y, move.piece as any);
         }
     };
 
@@ -78,11 +81,13 @@ export function useShogiGame(kifuData: JKFData): UseShogiGameResult {
             }
         }
 
+        let prevTo: JKFPosition | undefined;
         for (let i = 1; i <= moveIndex; i++) {
-            const move = moves[i];
-            if (move && move.move) {
+            const moveData = moves[i];
+            if (moveData && moveData.move) {
                 try {
-                    applyMove(newShogi, move);
+                    applyMove(newShogi, moveData, prevTo);
+                    prevTo = moveData.move.to ?? prevTo;
                 } catch (error) {
                     console.error('Error resetting to move:', error);
                     break;

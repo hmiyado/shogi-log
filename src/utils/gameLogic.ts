@@ -48,7 +48,7 @@ export function formatMove(move: any, prevMove: any = null): string {
     let text = mark;
 
     // 同位置への移動
-    if (prevMove && prevMove.to && move.to && prevMove.to.x === move.to.x && prevMove.to.y === move.to.y) {
+    if (move.same || (prevMove && prevMove.to && move.to && prevMove.to.x === move.to.x && prevMove.to.y === move.to.y)) {
         text += '同';
     } else if (move.to) {
         text += positionToArabic(move.to.x, move.to.y);
